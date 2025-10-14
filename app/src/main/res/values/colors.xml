@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Azul personalizado -->
+    <color name="blue_primary">#0A66C2</color>          <!-- principal -->
+    <color name="blue_onPrimary">#FFFFFF</color>        <!-- texto/íconos sobre primary -->
+    <color name="blue_primaryContainer">#D7E6FB</color>
+    <color name="blue_onPrimaryContainer">#083561</color>
+
+    <color name="blue_secondary">#125A9C</color>
+    <color name="blue_onSecondary">#FFFFFF</color>
+
+
+    <color name="blue_secondaryContainer">#D0E4F9</color>
+    <color name="blue_onSecondaryContainer">#0A2E52</color>
+
+    <color name="blue_surface">#C8E1F0</color>
+    <color name="blue_onSurface">#2E2D2D</color>
+    <color name="blue_background">#F7FAFF</color>
+    <color name="blue_onBackground">#1E1E1E</color>
+</resources>

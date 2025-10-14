@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_monthly"
+            android:title="Resumen mensual"
+            android:icon="@android:drawable/ic_menu_month" />
+
+        <item
+            android:id="@+id/nav_contact"
+            android:title="Contáctame (personaliza tu app)"
+            android:icon="@android:drawable/ic_menu_send" />
+    </group>
+
+    <item android:title=" " /> <!-- separador -->
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_footer_owner"
+            android:enabled="false"
+            android:title="Roger Rodríguez — RDRP" />
+        <item
+            android:id="@+id/nav_footer_copy"
+            android:enabled="false"
+            android:title="© 2025 RDRP. Todos los derechos reservados" />
+    </group>
+</menu>

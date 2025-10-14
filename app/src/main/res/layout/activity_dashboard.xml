@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout
+        android:orientation="vertical" android:padding="16dp"
+        android:layout_width="match_parent" android:layout_height="wrap_content">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:hint="Fecha (YYY/MM/dd)"
+            android:layout_width="match_parent" android:layout_height="wrap_content">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFechaDash"
+                android:layout_width="match_parent" android:layout_height="wrap_content"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView android:id="@+id/tvPedidosDia"
+            android:textStyle="bold" android:textSize="18sp"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="12dp" />
+
+        <TextView android:id="@+id/tvTotalDia"
+            android:textSize="16sp" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView android:id="@+id/tvCombustible"
+            android:textSize="16sp" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView android:id="@+id/tvComision"
+            android:textSize="16sp" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView android:id="@+id/tvLiquido"
+            android:textStyle="bold" android:textSize="18sp"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp" />
+
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/pieChart"
+            android:layout_width="match_parent"
+            android:layout_height="260dp"/>
+
+    </LinearLayout>
+</ScrollView>

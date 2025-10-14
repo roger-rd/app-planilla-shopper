@@ -1,0 +1,42 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.PlanillaShopper" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Colores base -->
+        <item name="colorPrimary">@color/blue_primary</item>
+        <item name="colorOnPrimary">@color/blue_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/blue_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/blue_onPrimaryContainer</item>
+
+        <item name="colorSecondary">@color/blue_secondary</item>
+        <item name="colorOnSecondary">@color/blue_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/blue_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/blue_onSecondaryContainer</item>
+
+        <!--<item name="colorSurface">@color/blue_surface</item>-->
+
+        <item name="colorOnSurface">@color/blue_onSurface</item>
+        <item name="android:colorBackground">@color/blue_background</item>
+        <item name="colorOnBackground">@color/blue_onBackground</item>
+        <item name="toolbarStyle">@style/MyToolbarStyle</item>
+        <!-- Status bar / nav bar -->
+        <item name="android:statusBarColor">@color/blue_primary</item>
+        <item name="android:navigationBarColor">@color/blue_primary</item>
+        <!-- Iconos claros en status bar (para que se vean sobre el azul) -->
+        <item name="android:windowLightStatusBar">false</item>
+
+        <!-- Botones por defecto con tu primary -->
+        <item name="materialButtonStyle">@style/Widget.PS.PrimaryButton</item>
+    </style>
+
+    <!-- Overlay para Toolbar (texto blanco sí o sí) -->
+    <style name="ThemeOverlay.PS.Toolbar" parent="ThemeOverlay.Material3.Dark.ActionBar">
+        <item name="android:textColorPrimary">@android:color/white</item>
+        <item name="titleTextColor">@android:color/white</item>
+        <item name="subtitleTextColor">@android:color/white</item>
+    </style>
+
+    <!-- Estilo de botón material primario -->
+    <style name="Widget.PS.PrimaryButton" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/blue_primary</item>
+        <item name="android:textColor">@color/blue_onPrimary</item>
+    </style>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="blue_primary">#0A66C2</color>
+    <color name="blue_onPrimary">#FFFFFF</color>
+    <color name="blue_primaryContainer">#0A3D74</color>
+    <color name="blue_onPrimaryContainer">#FFFFFF</color>
+
+    <color name="blue_secondary">#0F4D84</color>
+    <color name="blue_onSecondary">#FFFFFF</color>
+    <color name="blue_secondaryContainer">#0B3760</color>
+    <color name="blue_onSecondaryContainer">#FFFFFF</color>
+
+    <color name="blue_surface">#121212</color>
+    <color name="blue_onSurface">#EDEDED</color>
+    <color name="blue_background">#101114</color>
+    <color name="blue_onBackground">#EDEDED</color>
+</resources>

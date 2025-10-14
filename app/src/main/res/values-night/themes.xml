@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.PlanillaShopper" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/blue_primary</item>
+        <item name="colorOnPrimary">@color/blue_onPrimary</item>
+        <item name="android:statusBarColor">@color/blue_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="materialButtonStyle">@style/Widget.PS.PrimaryButton</item>
+    </style>
+</resources>

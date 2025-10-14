@@ -1,0 +1,49 @@
+[versions]
+appcompat = "1.6.1"
+material = "1.10.0"
+constraintlayout = "2.1.4"
+activity = "1.9.2"
+room = "2.6.1"
+lifecycle = "2.8.4"
+mpandroidchart = "v3.1.0"
+junit = "4.13.2"
+androidx-junit = "1.1.5"
+espresso = "3.5.1"
+agp = "8.6.1"
+recyclerview = "1.3.2"
+material-version = "1.12.0"
+coordinatorlayout = "1.2.0"
+drawerlayout = "1.2.0"
+coordinatorlayout-version = "1.3.0"
+
+[libraries]
+# UI base
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+activity = { module = "androidx.activity:activity", version.ref = "activity" }
+
+# Room  ⚠️ ENTRADAS SEPARADAS (no anidar)
+room-runtime  = { module = "androidx.room:room-runtime",  version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+
+# LiveData
+lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata", version.ref = "lifecycle" }
+
+# Charts
+mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
+
+# Tests
+junit = { module = "junit:junit", version.ref = "junit" }
+ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidx-junit" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
+recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+google-material = { group = "com.google.android.material", name = "material", version.ref = "material-version" }
+coordinatorlayout = { group = "androidx.coordinatorlayout", name = "coordinatorlayout", version.ref = "coordinatorlayout" }
+drawerlayout = { group = "androidx.drawerlayout", name = "drawerlayout", version.ref = "drawerlayout" }
+androidx-coordinatorlayout = { group = "androidx.coordinatorlayout", name = "coordinatorlayout", version.ref = "coordinatorlayout-version" }
+
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+

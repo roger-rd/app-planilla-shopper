@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- fecha -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Fecha (yyyy/MM/dd)">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etFechaEdit"
+            android:inputType="date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- SG -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="SG">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSgEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:digits="0123456789"
+            android:maxLength="11"/>
+    </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="SKU">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etSkuEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            android:digits="0123456789"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- KM -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="KM">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etKmEdit"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="0123456789.,"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- ventana -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Ventana">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etVentanaEdit"
+            android:inputType="number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="0123456789"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Cantidad Producto -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Cant">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etCantEdit"
+            android:inputType="number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="0123456789"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>
