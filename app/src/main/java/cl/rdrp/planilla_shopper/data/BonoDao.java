@@ -16,6 +16,10 @@ public interface BonoDao {
     @Query("SELECT * FROM bonos WHERE fecha = :fecha ORDER BY id DESC")
     List<BonoExtra> listByFecha(String fecha);
 
+    // ✅ SUMA BONOS ENTRE FECHAS (MES COMPLETO)
+    @Query("SELECT IFNULL(SUM(monto),0) FROM bonos WHERE fecha BETWEEN :desde AND :hasta")
+    long sumBonosRango(String desde, String hasta);
+
     @Delete
     void delete(BonoExtra bono);
 }

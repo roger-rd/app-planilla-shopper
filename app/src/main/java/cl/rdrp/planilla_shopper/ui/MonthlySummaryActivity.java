@@ -15,12 +15,14 @@ import cl.rdrp.planilla_shopper.data.AppDatabase;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.data.RegistroDao;
 import cl.rdrp.planilla_shopper.databinding.ActivityMonthlySummaryBinding;
+import cl.rdrp.planilla_shopper.data.BonoDao;
 
 public class MonthlySummaryActivity extends AppCompatActivity {
 
     private ActivityMonthlySummaryBinding vb;
     private final Executor exec = Executors.newSingleThreadExecutor();
     private RegistroDao dao;
+    private BonoDao bonoDao;
 
     private final NumberFormat clp = NumberFormat.getCurrencyInstance(new Locale("es", "CL"));
 
@@ -35,11 +37,13 @@ public class MonthlySummaryActivity extends AppCompatActivity {
         vb = ActivityMonthlySummaryBinding.inflate(getLayoutInflater());
         setContentView(vb.getRoot());
 
+
         setTitle("Resumen mensual");
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         dao = AppDatabase.get(this).registroDao();
+        bonoDao = AppDatabase.get(this).bonoDao();
 
         Calendar c = Calendar.getInstance();
         vb.tvMes.setText(formatoMes(c));
@@ -71,51 +75,56 @@ public class MonthlySummaryActivity extends AppCompatActivity {
         exec.execute(() -> {
             List<Registro> items = dao.listByRangoFechas(desde, hasta);
 
+            // ✅ BONOS DEL MES (desde tabla bonos)
+            long bonos = bonoDao.sumBonosRango(desde, hasta);
+
             int pedidosMes = items.size();
             Set<String> dias = new HashSet<>();
             int totalSku = 0;
             double totalKm = 0.0;
-            long totalMes$ = 0;
+            long totalMes$ = 0; // total de registros (sin bonos)
 
             for (Registro r : items) {
                 dias.add(r.fecha);
 
                 int skuQty = parseIntOnlyDigits(r.sku);
                 totalSku += skuQty;
-                totalKm  += r.km;
+                totalKm += r.km;
 
-                int base   = basePorSku(skuQty);
-                int sSku   = skuQty * VALOR_UNIT_SKU;
-                long sKm   = Math.round(r.km * VALOR_UNIT_KM);
+                int base = basePorSku(skuQty);
+                int sSku = skuQty * VALOR_UNIT_SKU;
+                long sKm = Math.round(r.km * VALOR_UNIT_KM);
 
                 totalMes$ += base + sSku + sKm;
             }
 
-            int diasTrabajados   = Math.max(1, dias.size());
-            int promPedidosDia   = Math.round(pedidosMes / (float) diasTrabajados);
-            int promSkuPorPed    = pedidosMes == 0 ? 0 : Math.round(totalSku / (float) pedidosMes);
-            long bonos           = 0;
-            long promedioDiario$ = Math.round(totalMes$ / (double) diasTrabajados);
+            // ✅ total final incluyendo bonos (una sola vez, fuera del for)
+            long totalConBonos$ = totalMes$ + bonos;
 
-            // Descuentos y líquido
-            double descGasolina = totalMes$ * DESCUENTO_GASOLINA;
-            double descImpuesto = totalMes$ * DESCUENTO_IMPUESTO;
-            double liquido      = totalMes$ - descGasolina - descImpuesto;
+            int diasTrabajados = Math.max(1, dias.size());
+            int promPedidosDia = Math.round(pedidosMes / (float) diasTrabajados);
+            int promSkuPorPed = pedidosMes == 0 ? 0 : Math.round(totalSku / (float) pedidosMes);
+            long promedioDiario$ = Math.round(totalConBonos$ / (double) diasTrabajados);
 
-            // Congelar valores para el lambda
-            final int    pedidosMesF = pedidosMes;
-            final int    diasTrabF   = diasTrabajados;
-            final int    promPedF    = promPedidosDia;
-            final int    totalSkuF   = totalSku;
-            final int    promSkuF    = promSkuPorPed;
-            final double totalKmF    = totalKm;
-            final long   bonosF      = bonos;
+            // ✅ Descuentos y líquido en base al total con bonos
+            double descGasolina = totalConBonos$ * DESCUENTO_GASOLINA;
+            double descImpuesto = totalConBonos$ * DESCUENTO_IMPUESTO;
+            double liquido = totalConBonos$ - descGasolina - descImpuesto;
 
-            final String sPromDia  = clp.format(promedioDiario$);
-            final String sTotalMes = clp.format(totalMes$);
-            final String sDescGas  = "-" + clp.format(descGasolina);
-            final String sDescImp  = "-" + clp.format(descImpuesto);
-            final String sLiquido  = clp.format(liquido);
+            // Congelar valores para el UI thread
+            final int pedidosMesF = pedidosMes;
+            final int diasTrabF = diasTrabajados;
+            final int promPedF = promPedidosDia;
+            final int totalSkuF = totalSku;
+            final int promSkuF = promSkuPorPed;
+            final double totalKmF = totalKm;
+            final long bonosF = bonos;
+
+            final String sPromDia = clp.format(promedioDiario$);
+            final String sTotalMes = clp.format(totalConBonos$);
+            final String sDescGas = "-" + clp.format(descGasolina);
+            final String sDescImp = "-" + clp.format(descImpuesto);
+            final String sLiquido = clp.format(liquido);
 
             runOnUiThread(() -> {
                 vb.tvPedidosMes.setText(String.valueOf(pedidosMesF));
@@ -124,7 +133,9 @@ public class MonthlySummaryActivity extends AppCompatActivity {
                 vb.tvSkuMes.setText(String.valueOf(totalSkuF));
                 vb.tvPromSku.setText(String.valueOf(promSkuF));
                 vb.tvKmMes.setText(String.format(Locale.US, "%.2f", totalKmF));
-                vb.tvBonos.setText(String.valueOf(bonosF));
+
+                // ✅ Aquí muestra bonos (te recomiendo con formato CLP)
+                vb.tvBonos.setText(clp.format(bonosF));
 
                 vb.tvPromedioDiario.setText(sPromDia);
                 vb.tvTotalMesPesos.setText(sTotalMes);
@@ -134,6 +145,7 @@ public class MonthlySummaryActivity extends AppCompatActivity {
             });
         });
     }
+
 
 
     private static String formatoMes(Calendar c) {
