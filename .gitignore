@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# APKs y artefactos de release (no versionar)
+/app/release/
+
+# .idea ruido que cambia solo (preferencias locales / por máquina)
+/.idea/misc.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/deviceManager.xml
