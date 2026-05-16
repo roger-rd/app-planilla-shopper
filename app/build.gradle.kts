@@ -53,7 +53,6 @@ dependencies {
     implementation(libs.androidx.coordinatorlayout)
     implementation(libs.gson)
     annotationProcessor(libs.room.compiler)
-    annotationProcessor(libs.room.compiler)
 
     // LiveData
     implementation(libs.lifecycle.livedata)

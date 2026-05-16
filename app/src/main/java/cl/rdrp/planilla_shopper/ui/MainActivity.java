@@ -430,11 +430,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // === MODELO CONTENEDOR DE BACKUP ===
-    public static class BackupData {
-        public java.util.List<Registro> registros;
-    }
-
     private void mostrarDialogoBono() {
         android.view.LayoutInflater inf = android.view.LayoutInflater.from(this);
         android.view.View view = inf.inflate(R.layout.dialog_bono_extra, null);
