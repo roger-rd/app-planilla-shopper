@@ -14,7 +14,6 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.Executors;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
@@ -66,7 +65,7 @@ public class BencinaActivity extends AppCompatActivity {
 
     // Rellenar kmAnterior con la última carga guardada
     private void cargarKmAnteriorDesdeUltimaRecarga() {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
             Combustible last = AppDatabase.get(BencinaActivity.this)
                     .combustibleDao()
                     .getLast();
@@ -130,7 +129,7 @@ public class BencinaActivity extends AppCompatActivity {
                 totalPagado
         );
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
             AppDatabase.get(BencinaActivity.this).combustibleDao().insert(c);
 
             runOnUiThread(() -> {

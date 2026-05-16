@@ -12,7 +12,6 @@ import com.google.android.material.navigation.NavigationView;
 
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.concurrent.Executors;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
@@ -156,8 +155,7 @@ public class MainActivity extends AppCompatActivity {
                                             : "") + "?"
                     )
                     .setPositiveButton("Eliminar", (d, w) -> {
-                        java.util.concurrent.Executors.newSingleThreadExecutor()
-                                .execute(() -> {
+                        AppDatabase.ioExecutor.execute(() -> {
                                     cl.rdrp.planilla_shopper.data.AppDatabase
                                             .get(this)
                                             .bonoDao()
@@ -204,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
         String iso = Texts.s(vb.etFecha.getText());      // yyyy-MM-dd
         String legacy = Fechas.toLegacy(iso);            // dd/MM/yyyy compat
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
             // registros normales
             java.util.List<cl.rdrp.planilla_shopper.data.Registro> items =
                     cl.rdrp.planilla_shopper.data.AppDatabase.get(this)
@@ -292,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
                     int cant = cantI;
 
 
-                    Executors.newSingleThreadExecutor().execute(() -> {
+                    AppDatabase.ioExecutor.execute(() -> {
                         AppDatabase.get(this).registroDao().update(r.id, fechaTxt, skuN, km, sg, ventana, cant);
                         runOnUiThread(this::cargarListaDelDia);
                     });
@@ -305,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
         new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle("Eliminar")
                 .setMessage("¿Eliminar este registro?")
-                .setPositiveButton("Sí", (d, w) -> java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+                .setPositiveButton("Sí", (d, w) -> AppDatabase.ioExecutor.execute(() -> {
                     cl.rdrp.planilla_shopper.data.AppDatabase.get(this).registroDao().delete(r.id);
                     runOnUiThread(this::cargarListaDelDia);
                 }))
@@ -357,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
 
         Registro r = new Registro(fecha, local, sku, km, sg, ventana, cant);
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
             AppDatabase.get(this).registroDao().insertIgnore(r);
             runOnUiThread(() -> {
                 Toast.makeText(this, "Guardado", Toast.LENGTH_SHORT).show();
@@ -413,8 +411,7 @@ public class MainActivity extends AppCompatActivity {
                     b.descripcion = desc;
                     b.monto = monto;
 
-                    java.util.concurrent.Executors.newSingleThreadExecutor()
-                            .execute(() -> {
+                    AppDatabase.ioExecutor.execute(() -> {
                                 cl.rdrp.planilla_shopper.data.AppDatabase
                                         .get(this).bonoDao().insert(b);
 

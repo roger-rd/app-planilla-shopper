@@ -78,7 +78,7 @@ public class BackupActivity extends AppCompatActivity {
 
     // === EXPORTAR DATOS A JSON ===
     private void exportarDatosAUri(android.net.Uri uri) {
-        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
             try {
                 cl.rdrp.planilla_shopper.data.AppDatabase db = cl.rdrp.planilla_shopper.data.AppDatabase.get(this);
 
@@ -110,7 +110,7 @@ public class BackupActivity extends AppCompatActivity {
 
     // === IMPORTAR DATOS DESDE JSON ===
     private void importarDatosDesdeUri(android.net.Uri uri) {
-        java.util.concurrent.Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
             try {
                 StringBuilder sb = new StringBuilder();
 

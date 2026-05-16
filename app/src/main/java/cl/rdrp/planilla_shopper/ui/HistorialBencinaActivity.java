@@ -19,7 +19,6 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.Executors;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
@@ -64,7 +63,7 @@ public class HistorialBencinaActivity extends AppCompatActivity {
         });
         rv.setAdapter(adapter);
 
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
             AppDatabase.get(this).combustibleDao().normalizarFechasGuardadas();
             runOnUiThread(() -> {
                 setRangoMesActual();
@@ -124,7 +123,7 @@ public class HistorialBencinaActivity extends AppCompatActivity {
     }
 
     private void cargarDatosRango(String desde, String hasta) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
             // ✅ rango
             List<Combustible> lista = AppDatabase.get(this).combustibleDao().listByRango(desde, hasta);
             double total = AppDatabase.get(this).combustibleDao().sumTotalPagadoRango(desde, hasta);
@@ -142,7 +141,7 @@ public class HistorialBencinaActivity extends AppCompatActivity {
                 .setTitle("Eliminar recarga")
                 .setMessage("¿Eliminar esta recarga de combustible?")
                 .setPositiveButton("Eliminar", (d, w) -> {
-                    Executors.newSingleThreadExecutor().execute(() -> {
+                    AppDatabase.ioExecutor.execute(() -> {
                         AppDatabase.get(this).combustibleDao().deleteById(c.id);
                         runOnUiThread(() -> {
                             Toast.makeText(this, "Eliminado", Toast.LENGTH_SHORT).show();
@@ -235,7 +234,7 @@ public class HistorialBencinaActivity extends AppCompatActivity {
                     double kmRec = kmAct - kmAnt;
                     double total = valor * litros;
 
-                    Executors.newSingleThreadExecutor().execute(() -> {
+                    AppDatabase.ioExecutor.execute(() -> {
                         AppDatabase.get(this).combustibleDao().updateById(
                                 c.id,
                                 fechaStr,

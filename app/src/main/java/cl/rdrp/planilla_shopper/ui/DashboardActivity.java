@@ -22,7 +22,6 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
@@ -39,7 +38,7 @@ public class DashboardActivity extends AppCompatActivity {
     private RegistroDao dao;
     private BonoDao bonoDao;
     private final NumberFormat money = NumberFormat.getCurrencyInstance(new Locale("es","CL"));
-    private final Executor exec = Executors.newSingleThreadExecutor();
+    private final Executor exec = AppDatabase.ioExecutor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

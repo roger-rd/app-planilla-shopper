@@ -27,7 +27,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Executors;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
@@ -92,7 +91,7 @@ public class VistaGeneralActivity extends AppCompatActivity {
         });
     }
     private void cargarRango(String desde, String hasta) {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        AppDatabase.ioExecutor.execute(() -> {
 
             baseRango = AppDatabase.get(this)
                     .registroDao()

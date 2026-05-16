@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.data.RegistroDao;
@@ -25,7 +24,7 @@ import cl.rdrp.planilla_shopper.util.Config;
 public class MonthlySummaryActivity extends AppCompatActivity {
 
     private ActivityMonthlySummaryBinding vb;
-    private final Executor exec = Executors.newSingleThreadExecutor();
+    private final Executor exec = AppDatabase.ioExecutor;
     private RegistroDao dao;
     private BonoDao bonoDao;
 
