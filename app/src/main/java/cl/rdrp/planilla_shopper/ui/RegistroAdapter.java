@@ -66,7 +66,7 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
         // Cálculos por fila
         int base   = basePorSku(skuQty);
         int sSku   = skuQty * VALOR_UNIT_SKU;
-        long sKm   = Math.round(r.km * VALOR_UNIT_KM); // KM con decimales → pesos
+        long sKm   = Config.calcularTotalKm(r.km, r.fecha); // KM con decimales → pesos // modif cuando pase contingencia
 
         // 💰 bono por km según fecha
         double bonoKm = Config.calcularBonoKm(r.km, r.fecha);

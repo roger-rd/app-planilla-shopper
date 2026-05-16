@@ -19,6 +19,7 @@ import cl.rdrp.planilla_shopper.data.RegistroDao;
 import cl.rdrp.planilla_shopper.databinding.ActivityMonthlySummaryBinding;
 import cl.rdrp.planilla_shopper.data.BonoDao;
 import cl.rdrp.planilla_shopper.data.CombustibleDao;
+import cl.rdrp.planilla_shopper.util.Config;
 
 
 public class MonthlySummaryActivity extends AppCompatActivity {
@@ -34,8 +35,7 @@ public class MonthlySummaryActivity extends AppCompatActivity {
 
 
     // Descuentos
-    private static final double DESCUENTO_GASOLINA = 0.10; // 10%
-    private static final double DESCUENTO_IMPUESTO = 0.15; // 10%
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +101,7 @@ public class MonthlySummaryActivity extends AppCompatActivity {
 
                 int base = basePorSku(skuQty);
                 int sSku = skuQty * VALOR_UNIT_SKU;
-                long sKm = Math.round(r.km * VALOR_UNIT_KM);
+                long sKm = Config.calcularTotalKm(r.km, r.fecha); // modif cuando pase contingencia
                 bonoKm$ += calcularBonoKm(r.km, r.fecha);
 
                 totalMes$ += base + sSku + sKm;
@@ -121,7 +121,7 @@ public class MonthlySummaryActivity extends AppCompatActivity {
 
             // ✅ Descuentos y líquido en base al total con bonos
             double descGasolina = bencinaReal;
-            double descImpuesto = totalConBonos$ * DESCUENTO_IMPUESTO;
+            double descImpuesto = totalConBonos$ * Config.COMISION_PORC;
             double liquido = totalConBonos$ - descGasolina - descImpuesto;
 
             // Congelar valores para el UI thread

@@ -1,150 +1,321 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    android:background="@color/blue_background">
+    android:background="@color/blue_background"
+    android:fillViewport="true">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="32dp">
 
-        <!-- TÍTULO -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Registro de bencina"
-            android:textColor="@color/blue_onBackground"
-            android:textStyle="bold"
-            android:textSize="22sp"
-            android:layout_marginBottom="16dp" />
-
-        <!-- BENCINERA -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Bencinera"
-            android:textColor="@color/blue_onBackground"
-            android:textStyle="bold"
-            android:layout_marginBottom="6dp" />
-
-        <Spinner
-            android:id="@+id/spBencinera"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@color/blue_surface" />
-
-        <!-- KM -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Kilómetros"
-            android:textColor="@color/blue_onBackground"
-            android:textStyle="bold"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="6dp" />
-
+        <!-- ENCABEZADO -->
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="2">
+            android:layout_marginBottom="20dp"
+            android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/etKmAnterior"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="48dp"
-                android:hint="KM anterior"
-                android:textColor="@color/blue_onBackground"
-                android:background="@color/blue_surface"
-                android:inputType="number" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NUEVA RECARGA"
+                android:textColor="@color/blue_secondary"
+                android:textSize="11sp"
+                android:letterSpacing="0.1" />
 
-            <View android:layout_width="8dp" android:layout_height="0dp"/>
-
-            <EditText
-                android:id="@+id/etKmActual"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="48dp"
-                android:hint="KM actual"
-                android:textColor="@color/blue_onBackground"
-                android:background="@color/blue_surface"
-                android:inputType="number" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Registro de bencina"
+                android:textColor="@color/blue_onSurface"
+                android:textSize="24sp"
+                android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- TIPO DE BENCINA -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Tipo de bencina"
-            android:textColor="@color/blue_onBackground"
-            android:textStyle="bold"
-            android:layout_marginTop="20dp"
-            android:layout_marginBottom="6dp" />
-
-        <Spinner
-            android:id="@+id/spTipoBencina"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@color/blue_surface" />
-
-        <!-- VALOR / LITROS -->
-        <LinearLayout
-            android:orientation="horizontal"
+        <!-- CARD: ESTACIÓN Y TIPO -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="2"
-            android:layout_marginTop="20dp">
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp">
 
-            <EditText
-                android:id="@+id/etValor"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="48dp"
-                android:hint="Valor"
-                android:textColor="@color/blue_onBackground"
-                android:background="@color/blue_surface"
-                android:inputType="numberDecimal" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
 
-            <View android:layout_width="8dp" android:layout_height="0dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="14dp"
+                    android:text="ESTACIÓN Y COMBUSTIBLE"
+                    android:textColor="@color/blue_secondary"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.1" />
 
-            <EditText
-                android:id="@+id/etLitros"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="48dp"
-                android:hint="Litros"
-                android:textColor="@color/blue_onBackground"
-                android:background="@color/blue_surface"
-                android:inputType="numberDecimal" />
-        </LinearLayout>
+                <!-- Bencinera -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bencinera"
+                    android:textColor="#888"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="6dp" />
 
-        <!-- RESUMEN -->
-        <TextView
-            android:id="@+id/tvResumen"
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/blue_primaryContainer"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+
+                    <Spinner
+                        android:id="@+id/spBencinera"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:paddingHorizontal="12dp" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Tipo de bencina -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tipo de bencina"
+                    android:textColor="#888"
+                    android:textSize="12sp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="6dp" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardBackgroundColor="@color/blue_primaryContainer"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+
+                    <Spinner
+                        android:id="@+id/spTipoBencina"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:paddingHorizontal="12dp" />
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- CARD: KILÓMETROS -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Resumen:"
-            android:textColor="@color/blue_onSurface"
-            android:padding="18dp"
-            android:background="@color/blue_surface"
-            android:elevation="3dp"
-            android:layout_marginTop="25dp"
-            android:textSize="16sp" />
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp">
 
-        <!-- BOTÓN -->
-        <Button
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="14dp"
+                    android:text="KILOMETRAJE"
+                    android:textColor="@color/blue_secondary"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:hint="KM anterior"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etKmAnterior"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <View
+                        android:layout_width="10dp"
+                        android:layout_height="0dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:hint="KM actual"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etKmActual"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- CARD: VALOR Y LITROS -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="14dp"
+                    android:text="MONTO Y CARGA"
+                    android:textColor="@color/blue_secondary"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.1" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:hint="Valor"
+                        app:prefixText="$"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etValor"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <View
+                        android:layout_width="10dp"
+                        android:layout_height="0dp" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:hint="Litros"
+                        app:suffixText="L"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etLitros"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- CARD: RESUMEN (destacado) -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:cardBackgroundColor="@color/blue_primaryContainer"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/blue_primary"
+            app:strokeWidth="1.5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="RESUMEN"
+                    android:textColor="@color/blue_onPrimaryContainer"
+                    android:textSize="11sp"
+                    android:letterSpacing="0.12"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/tvResumen"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Resumen:"
+                    android:textColor="@color/blue_onPrimaryContainer"
+                    android:textSize="15sp"
+                    android:lineSpacingExtra="3dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- BOTÓN GUARDAR -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuardarBencina"
             android:layout_width="match_parent"
-            android:layout_height="54dp"
+            android:layout_height="56dp"
             android:text="Guardar registro"
             android:textColor="@color/blue_onPrimary"
-            android:backgroundTint="@color/blue_primary"
-            android:layout_marginTop="24dp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:letterSpacing="0.05"
+            app:backgroundTint="@color/blue_primary"
+            app:cornerRadius="16dp"
+            app:elevation="3dp" />
 
     </LinearLayout>
-
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

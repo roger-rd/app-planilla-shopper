@@ -35,6 +35,10 @@
         <activity
             android:name=".ui.HistorialBencinaActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ui.VistaGeneralActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -22,4 +22,12 @@ public interface BonoDao {
 
     @Delete
     void delete(BonoExtra bono);
+
+    @Query("SELECT IFNULL(SUM(monto),0) FROM bonos WHERE fecha = :fecha")
+    long sumBonosFecha(String fecha);
+
+    @Query("SELECT DISTINCT fecha FROM bonos WHERE fecha BETWEEN :desde AND :hasta")
+    List<String> listFechasConBonos(String desde, String hasta);
+
+
 }

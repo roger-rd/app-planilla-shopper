@@ -1,70 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@color/blue_background">
+    android:background="@color/blue_background"
+    android:paddingHorizontal="16dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="16dp">
+
+    <!-- ENCABEZADO -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="HISTORIAL"
+        android:textColor="@color/blue_secondary"
+        android:textSize="11sp"
+        android:letterSpacing="0.1" />
 
     <TextView
         android:id="@+id/tvTituloHistorial"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Historial de recargas"
-        android:textSize="20sp"
-        android:textColor="@color/blue_onBackground"
+        android:textSize="24sp"
+        android:textColor="@color/blue_onSurface"
         android:textStyle="bold"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="16dp" />
 
-    <!-- ✅ FILTRO -->
-    <LinearLayout
+    <!-- CARD: FILTROS -->
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="3">
+        android:layout_marginBottom="12dp"
+        app:cardBackgroundColor="@android:color/white"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2dp">
 
-        <Button
-            android:id="@+id/btnDesde"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="Desde" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <View
-            android:layout_width="8dp"
-            android:layout_height="0dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FILTRAR POR FECHA"
+                android:textColor="@color/blue_secondary"
+                android:textSize="11sp"
+                android:letterSpacing="0.1"
+                android:layout_marginBottom="12dp" />
 
-        <Button
-            android:id="@+id/btnHasta"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="Hasta" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-        <View
-            android:layout_width="8dp"
-            android:layout_height="0dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnDesde"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="48dp"
+                    android:text="Desde"
+                    android:textColor="@color/blue_primary"
+                    app:icon="@android:drawable/ic_menu_my_calendar"
+                    app:iconTint="@color/blue_primary"
+                    app:strokeColor="@color/blue_primary"
+                    app:strokeWidth="1.5dp"
+                    app:cornerRadius="12dp" />
 
-        <Button
-            android:id="@+id/btnFiltrar"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="48dp"
-            android:text="Filtrar" />
-    </LinearLayout>
+                <View
+                    android:layout_width="10dp"
+                    android:layout_height="0dp" />
 
-    <!-- ✅ TOTALES -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnHasta"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="48dp"
+                    android:text="Hasta"
+                    android:textColor="@color/blue_primary"
+                    app:icon="@android:drawable/ic_menu_my_calendar"
+                    app:iconTint="@color/blue_primary"
+                    app:strokeColor="@color/blue_primary"
+                    app:strokeWidth="1.5dp"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnFiltrar"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:text="Filtrar"
+                android:textStyle="bold"
+                android:textColor="@color/blue_onPrimary"
+                app:backgroundTint="@color/blue_primary"
+                app:cornerRadius="12dp"
+                app:icon="@android:drawable/ic_menu_search"
+                app:iconTint="@color/blue_onPrimary" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- CARD: TOTALES -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        app:cardBackgroundColor="@color/blue_primary"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="3dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TOTALES DEL PERÍODO"
+                android:textColor="#AACFFF"
+                android:textSize="11sp"
+                android:letterSpacing="0.12"
+                android:layout_marginBottom="6dp" />
+
+            <TextView
+                android:id="@+id/tvTotales"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Totales: -"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:lineSpacingExtra="2dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- LISTA -->
     <TextView
-        android:id="@+id/tvTotales"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Totales: -"
-        android:textColor="@color/blue_onBackground"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:textStyle="bold" />
+        android:text="REGISTROS"
+        android:textColor="@color/blue_secondary"
+        android:textSize="11sp"
+        android:letterSpacing="0.1"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="8dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvBencina"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
 </LinearLayout>

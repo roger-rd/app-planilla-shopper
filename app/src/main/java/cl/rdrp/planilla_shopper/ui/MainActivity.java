@@ -24,8 +24,6 @@ import cl.rdrp.planilla_shopper.util.Prefs;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding vb;
     private cl.rdrp.planilla_shopper.ui.RegistroAdapter adapter;
-    private DrawerLayout drawer;
-    private ActionBarDrawerToggle toggle;
 
     private BonoAdapter bonoAdapter;
 
@@ -103,7 +101,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, BencinaActivity.class));
             }else if (id == R.id.nav_historial_bencina) {
                 startActivity(new Intent(this, HistorialBencinaActivity.class));
-            }
+            } else if (id == R.id.nav_vista_general) {
+            startActivity(new Intent(this, VistaGeneralActivity.class));
+        }
             drawer.closeDrawers();
             return true;
         });
@@ -167,11 +167,6 @@ public class MainActivity extends AppCompatActivity {
                     .setNegativeButton("Cancelar", null)
                     .show();
         });
-
-        vb.rvBonos.setAdapter(bonoAdapter);
-        vb.rvBonos.setLayoutManager(
-                new androidx.recyclerview.widget.LinearLayoutManager(this)
-        );
 
         vb.rvBonos.setAdapter(bonoAdapter);
         vb.rvBonos.setLayoutManager(

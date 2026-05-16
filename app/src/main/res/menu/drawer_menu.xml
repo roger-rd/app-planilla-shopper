@@ -8,14 +8,16 @@
             android:icon="@android:drawable/ic_menu_month" />
 
         <item
+            android:id="@+id/nav_vista_general"
+            android:title="Vista general (pedidos)"
+            android:icon="@android:drawable/ic_menu_agenda" />
+
+        <item
             android:id="@+id/nav_calculo"
             android:title="Calculos Parametros"
             android:icon="@android:drawable/ic_menu_view" />
 
-        <item
-            android:id="@+id/nav_contact"
-            android:title="Contáctame (personaliza tu app)"
-            android:icon="@android:drawable/ic_menu_send" />
+
 
         <item
             android:id="@+id/nav_bencina"
@@ -30,6 +32,11 @@
             android:id="@+id/nav_backup"
             android:title="Copia de seguridad"
             android:icon="@android:drawable/ic_menu_manage" />
+
+        <item
+            android:id="@+id/nav_contact"
+            android:title="Contáctame (personaliza tu app)"
+            android:icon="@android:drawable/ic_menu_send" />
 
     </group>
 

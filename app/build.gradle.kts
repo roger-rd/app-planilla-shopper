@@ -4,14 +4,14 @@ plugins {
 
 android {
     namespace = "cl.rdrp.planilla_shopper"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "cl.rdrp.planilla_shopper"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 22
-        versionName = "1.0.5"
+        targetSdk = 35
+        versionCode = 27
+        versionName = "1.0.10"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

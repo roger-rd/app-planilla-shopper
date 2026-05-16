@@ -126,7 +126,7 @@ public class DashboardActivity extends AppCompatActivity {
 
                 int  base   = basePorSku(skuQty);               // 👈 ahora viene de Config
                 int  sSku   = skuQty * VALOR_UNIT_SKU;
-                long sKm    = Math.round(r.km * VALOR_UNIT_KM);
+                long sKm    = Config.calcularTotalKm(r.km, r.fecha); //modif cuando pase contingencia
 
                 // bono km según fecha (solo domingo, lunes, martes)
                 double bonoKm = Config.calcularBonoKm(r.km, r.fecha);
@@ -181,10 +181,16 @@ public class DashboardActivity extends AppCompatActivity {
                         "Combustible: " + kmTxt + " km (" + money.format(costoCombustibleF) + ")"
                 );
 
-                vb.tvComision.setText(
-                        String.format(Locale.US, "%.1f%%: %s",
-                                (Config.COMISION_PORC * 100.0), money.format(comisionF))
+                double porcentaje = Config.COMISION_PORC * 100.0;
+
+                String texto = String.format(
+                        Locale.US,
+                        "Impuesto %.2f%%: %s",
+                        porcentaje,
+                        money.format(comisionF)
                 );
+
+                vb.tvComision.setText(texto);
 
                 vb.tvLiquido.setText("Líquido: " + money.format(liquidoF));
 
