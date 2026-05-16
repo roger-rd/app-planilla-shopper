@@ -10,7 +10,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -19,7 +18,10 @@ import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.databinding.ActivityMainBinding;
+import cl.rdrp.planilla_shopper.util.Fechas;
+import cl.rdrp.planilla_shopper.util.Parsers;
 import cl.rdrp.planilla_shopper.util.Prefs;
+import cl.rdrp.planilla_shopper.util.Texts;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding vb;
@@ -130,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
 
         // autorellenar hoy si está vacío (yyyy-MM-dd)
         if (vb.etFecha.getText() == null || vb.etFecha.getText().toString().isEmpty() ){
-            vb.etFecha.setText(hoyISO());
+            vb.etFecha.setText(Fechas.hoyISO());
         }
 
         // Lista de registros del día
@@ -182,10 +184,9 @@ public class MainActivity extends AppCompatActivity {
     // === DatePicker estilo Dashboard ===
     private void mostrarDatePicker() {
         Calendar cal = Calendar.getInstance();
-        String actual = s(vb.etFecha.getText());
-        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String actual = Texts.s(vb.etFecha.getText());
         try {
-            if (!actual.isEmpty()) cal.setTime(f.parse(actual));
+            if (!actual.isEmpty()) cal.setTime(Fechas.parseISO(actual));
         } catch (Exception ignored) {}
 
         int y = cal.get(Calendar.YEAR);
@@ -200,8 +201,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void cargarListaDelDia() {
-        String iso = s(vb.etFecha.getText());      // yyyy-MM-dd
-        String legacy = toLegacy(iso);             // dd/MM/yyyy compat
+        String iso = Texts.s(vb.etFecha.getText());      // yyyy-MM-dd
+        String legacy = Fechas.toLegacy(iso);            // dd/MM/yyyy compat
 
         Executors.newSingleThreadExecutor().execute(() -> {
             // registros normales
@@ -221,20 +222,6 @@ public class MainActivity extends AppCompatActivity {
                 bonoAdapter.submit(bonos);
             });
         });
-    }
-
-    private static String toLegacy(String iso) {
-        if (iso == null) return "";
-        iso = iso.trim();
-        if (iso.length() < 10) return iso;
-        try {
-            String y = iso.substring(0,4);
-            String m = iso.substring(5,7);
-            String d = iso.substring(8,10);
-            return d + "/" + m + "/" + y;
-        } catch (Exception e) {
-            return iso;
-        }
     }
 
     private void mostrarDialogoEditar(cl.rdrp.planilla_shopper.data.Registro r) {
@@ -260,9 +247,8 @@ public class MainActivity extends AppCompatActivity {
         etFecha.setOnClickListener(v -> {
             java.util.Calendar cal = java.util.Calendar.getInstance();
             try {
-                java.text.SimpleDateFormat f = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
-                String actual = s(etFecha.getText());
-                if (!actual.isEmpty()) cal.setTime(f.parse(actual));
+                String actual = Texts.s(etFecha.getText());
+                if (!actual.isEmpty()) cal.setTime(Fechas.parseISO(actual));
             } catch (Exception ignored) {}
 
             int y = cal.get(java.util.Calendar.YEAR);
@@ -279,22 +265,22 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("Editar registro")
                 .setView(view)
                 .setPositiveButton("Guardar", (d, w) -> {
-                    String fechaTxt = s(etFecha.getText());
-                    String skuTxt = s(etSku.getText());
-                    String kmTxt  = s(etKm.getText());
-                    String venTxt = s(etVentana.getText());
-                    String sgTxt  = s(etSg.getText());
+                    String fechaTxt = Texts.s(etFecha.getText());
+                    String skuTxt = Texts.s(etSku.getText());
+                    String kmTxt  = Texts.s(etKm.getText());
+                    String venTxt = Texts.s(etVentana.getText());
+                    String sgTxt  = Texts.s(etSg.getText());
 
                     if ( fechaTxt.isEmpty() ||skuTxt.isEmpty() || kmTxt.isEmpty() || venTxt.isEmpty() || sgTxt.isEmpty()) {
                         Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
                         return;
                     }
 
-                    Double  kmD  = parseDoubleStrict(s(etKm.getText()));
-                    Integer venI = parseIntOnlyDigits(s(etVentana.getText()));
-                    Long    sgL  = parseLongStrict(s(etSg.getText()));
-                    String  skuN = s(etSku.getText());
-                    Integer cantI = parseIntOnlyDigits(s(etCant.getText()));
+                    Double  kmD  = Parsers.parseDoubleOrNull(Texts.s(etKm.getText()));
+                    Integer venI = Parsers.parseIntOrNull(Texts.s(etVentana.getText()));
+                    Long    sgL  = Parsers.parseLongOrNull(Texts.s(etSg.getText()));
+                    String  skuN = Texts.s(etSku.getText());
+                    Integer cantI = Parsers.parseIntOrNull(Texts.s(etCant.getText()));
 
                     if (kmD == null || venI == null || sgL == null || cantI == null || skuN.isEmpty()) {
                         Toast.makeText(this, "Completa y usa valores válidos", Toast.LENGTH_SHORT).show();
@@ -328,13 +314,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void guardar() {
-        String fecha    = s(vb.etFecha.getText()); // ahora guarda yyyy-MM-dd
-        String local    = s(vb.etLocal.getText());
-        String sku      = s(vb.etSku.getText());
-        String kmS      = s(vb.etKm.getText());
-        String sgS      = s(vb.etSg.getText());
-        String ventanaS = s(vb.etVentana.getText());
-        String cantS    = s(vb.etCant.getText());
+        String fecha    = Texts.s(vb.etFecha.getText()); // ahora guarda yyyy-MM-dd
+        String local    = Texts.s(vb.etLocal.getText());
+        String sku      = Texts.s(vb.etSku.getText());
+        String kmS      = Texts.s(vb.etKm.getText());
+        String sgS      = Texts.s(vb.etSg.getText());
+        String ventanaS = Texts.s(vb.etVentana.getText());
+        String cantS    = Texts.s(vb.etCant.getText());
 
         // Guarda LOCAL predeterminado si no existe
         if (!Prefs.hasLocal(this)) {
@@ -348,11 +334,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Parseo robusto
-        Integer skuQtyI = parseIntOnlyDigits(sku);
-        Double  kmD     = parseDoubleStrict(kmS);
-        Long    sgL     = parseLongStrict(sgS);
-        Integer venI    = parseIntOnlyDigits(ventanaS);
-        Integer cantI   = parseIntOnlyDigits(cantS);
+        Integer skuQtyI = Parsers.parseIntOrNull(sku);
+        Double  kmD     = Parsers.parseDoubleOrNull(kmS);
+        Long    sgL     = Parsers.parseLongOrNull(sgS);
+        Integer venI    = Parsers.parseIntOrNull(ventanaS);
+        Integer cantI   = Parsers.parseIntOrNull(cantS);
 
         if (skuQtyI == null || kmD == null || sgL == null || venI == null || cantI == null) {
             Toast.makeText(this, "SKU, KM, SG, Ventana y Cant deben ser numéricos", Toast.LENGTH_SHORT).show();
@@ -389,47 +375,6 @@ public class MainActivity extends AppCompatActivity {
         vb.etCant.setText("");
     }
 
-    private String s(CharSequence cs) { return cs == null ? "" : cs.toString().trim(); }
-
-    private Long parseLongStrict(String s) {
-        if (s == null) return null;
-        s = s.trim();
-        if (s.isEmpty()) return null;
-        s = s.replaceAll("[^0-9]", "");
-        if (s.isEmpty()) return null;
-        try { return Long.parseLong(s); } catch (NumberFormatException e) { return null; }
-    }
-
-    private static Integer parseIntOnlyDigits(String s) {
-        if (s == null) return null;
-        s = s.trim().replaceAll("[^0-9]", "");
-        if (s.isEmpty()) return null;
-        try { return Integer.parseInt(s); } catch (NumberFormatException e) { return null; }
-    }
-
-    private Double parseDoubleStrict(String s) {
-        if (s == null) return null;
-        s = s.trim();
-        if (s.isEmpty()) return null;
-        // admite , o . como separador
-        s = s.replace(",", ".").replaceAll("[^0-9.]", "");
-        // evita 1..2 casos raros
-        int first = s.indexOf('.');
-        if (first >= 0) {
-            int next = s.indexOf('.', first + 1);
-            if (next >= 0) s = s.substring(0, next).replaceAll("\\.+$", "");
-        }
-        if (s.isEmpty() || s.equals(".")) return null;
-        try { return Double.parseDouble(s); } catch (NumberFormatException e) { return null; }
-    }
-
-    // === helper fecha hoy en ISO ===
-    private static String hoyISO() {
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
-        return sdf.format(new java.util.Date());
-    }
-
-
     private void mostrarDialogoBono() {
         android.view.LayoutInflater inf = android.view.LayoutInflater.from(this);
         android.view.View view = inf.inflate(R.layout.dialog_bono_extra, null);
@@ -442,10 +387,10 @@ public class MainActivity extends AppCompatActivity {
                 .setTitle("Agregar bono")
                 .setView(view)
                 .setPositiveButton("Guardar", (d, w) -> {
-                    String fecha = s(vb.etFecha.getText()); // día actual
-                    String sg    = s(etSg.getText());
-                    String desc  = s(etDesc.getText());
-                    String montoS= s(etMonto.getText());
+                    String fecha = Texts.s(vb.etFecha.getText()); // día actual
+                    String sg    = Texts.s(etSg.getText());
+                    String desc  = Texts.s(etDesc.getText());
+                    String montoS= Texts.s(etMonto.getText());
 
                     if (fecha.isEmpty() || montoS.isEmpty()) {
                         android.widget.Toast.makeText(this,
@@ -453,14 +398,13 @@ public class MainActivity extends AppCompatActivity {
                         return;
                     }
 
-                    int monto;
-                    try {
-                        monto = Integer.parseInt(montoS.replaceAll("[^0-9]", ""));
-                    } catch (NumberFormatException e) {
+                    Integer montoI = Parsers.parseIntOrNull(montoS);
+                    if (montoI == null) {
                         android.widget.Toast.makeText(this,
                                 "Monto inválido", android.widget.Toast.LENGTH_SHORT).show();
                         return;
                     }
+                    int monto = montoI;
 
                     cl.rdrp.planilla_shopper.data.BonoExtra b =
                             new cl.rdrp.planilla_shopper.data.BonoExtra();
