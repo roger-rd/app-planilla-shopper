@@ -9,6 +9,9 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Database(
         entities = {
                 Registro.class,
@@ -21,6 +24,18 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 public abstract class AppDatabase extends RoomDatabase {
 
     private static volatile AppDatabase INSTANCE;
+
+    /**
+     * Executor unico compartido para operaciones de IO/BD en toda la app.
+     * Centralizar aqui evita crear hilos por operacion y serializa las
+     * llamadas a Room en un solo worker thread.
+     *
+     * Uso: AppDatabase.ioExecutor.execute(() -> { ... });
+     *
+     * No se llama shutdown porque es de vida-de-aplicacion; el proceso JVM
+     * lo libera al cerrarse.
+     */
+    public static final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
 
     public abstract RegistroDao registroDao();
     public abstract CombustibleDao combustibleDao();
