@@ -1,7 +1,5 @@
 package cl.rdrp.planilla_shopper.ui;
 
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_KM;
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_SKU;
 import static cl.rdrp.planilla_shopper.util.Config.basePorSku;
 import static cl.rdrp.planilla_shopper.util.Config.calcularBonoKm;
 
@@ -100,7 +98,7 @@ public class MonthlySummaryActivity extends AppCompatActivity {
                 totalKm += r.km;
 
                 int base = basePorSku(skuQty);
-                int sSku = skuQty * VALOR_UNIT_SKU;
+                int sSku = skuQty * Config.getValorUnitSku();
                 long sKm = Config.calcularTotalKm(r.km, r.fecha); // modif cuando pase contingencia
                 bonoKm$ += calcularBonoKm(r.km, r.fecha);
 
@@ -121,7 +119,7 @@ public class MonthlySummaryActivity extends AppCompatActivity {
 
             // ✅ Descuentos y líquido en base al total con bonos
             double descGasolina = bencinaReal;
-            double descImpuesto = totalConBonos$ * Config.COMISION_PORC;
+            double descImpuesto = totalConBonos$ * Config.getComisionPorc();
             double liquido = totalConBonos$ - descGasolina - descImpuesto;
 
             // Congelar valores para el UI thread

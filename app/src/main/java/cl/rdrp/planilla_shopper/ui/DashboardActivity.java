@@ -1,7 +1,5 @@
 package cl.rdrp.planilla_shopper.ui;
 
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_KM;
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_SKU;
 import static cl.rdrp.planilla_shopper.util.Config.basePorSku;   // 👈 usamos SIEMPRE el del Config
 
 import android.app.DatePickerDialog;
@@ -110,7 +108,7 @@ public class DashboardActivity extends AppCompatActivity {
                 int skuQty = (skuQtyI == null ? 0 : skuQtyI);
 
                 int  base   = basePorSku(skuQty);               // 👈 ahora viene de Config
-                int  sSku   = skuQty * VALOR_UNIT_SKU;
+                int  sSku   = skuQty * Config.getValorUnitSku();
                 long sKm    = Config.calcularTotalKm(r.km, r.fecha); //modif cuando pase contingencia
 
                 // bono km según fecha (solo domingo, lunes, martes)
@@ -133,9 +131,9 @@ public class DashboardActivity extends AppCompatActivity {
 
             // Costos y comisiones (según tu Config)
             long costoCombustible = Math.round(
-                    (totalKm / Config.RENDIMIENTO_KM_POR_LITRO) * Config.PRECIO_LITRO
+                    (totalKm / Config.getRendimientoKmPorLitro()) * Config.getPrecioLitro()
             );
-            long comision = Math.round(totalDia * Config.COMISION_PORC);
+            long comision = Math.round(totalDia * Config.getComisionPorc());
             long liquido  = totalDia - comision - costoCombustible;
 
             // Copias finales para la UI
@@ -166,7 +164,7 @@ public class DashboardActivity extends AppCompatActivity {
                         "Combustible: " + kmTxt + " km (" + money.format(costoCombustibleF) + ")"
                 );
 
-                double porcentaje = Config.COMISION_PORC * 100.0;
+                double porcentaje = Config.getComisionPorc() * 100.0;
 
                 String texto = String.format(
                         Locale.US,

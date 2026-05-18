@@ -1,7 +1,5 @@
 package cl.rdrp.planilla_shopper.ui;
 
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_KM;
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_SKU;
 import static cl.rdrp.planilla_shopper.util.Config.basePorSku;
 import static cl.rdrp.planilla_shopper.util.Config.calcularBonoKm;
 
@@ -154,7 +152,7 @@ public class VistaGeneralActivity extends AppCompatActivity {
             for (Registro r : regs) {
                 int skuQty = Parsers.parseIntOrZero(r.sku);
                 int base   = basePorSku(skuQty);
-                int sSku   = skuQty * VALOR_UNIT_SKU;
+                int sSku   = skuQty * Config.getValorUnitSku();
                 long sKm   = Config.calcularTotalKm(r.km, r.fecha);
 
                 totalDiaPedidos += base + sSku + sKm;

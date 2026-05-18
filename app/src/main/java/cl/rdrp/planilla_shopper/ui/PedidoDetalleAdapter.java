@@ -1,7 +1,5 @@
 package cl.rdrp.planilla_shopper.ui;
 
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_KM;
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_SKU;
 import static cl.rdrp.planilla_shopper.util.Config.basePorSku;
 
 import android.view.LayoutInflater;
@@ -45,7 +43,7 @@ public class PedidoDetalleAdapter extends RecyclerView.Adapter<PedidoDetalleAdap
 
         int skuQty = Parsers.parseIntOrZero(r.sku);
         int base   = basePorSku(skuQty);
-        int sSku   = skuQty * VALOR_UNIT_SKU;
+        int sSku   = skuQty * Config.getValorUnitSku();
         long sKm   = Config.calcularTotalKm(r.km, r.fecha); // modificar cuando pase contingencia
         long total = base + sSku + sKm;
 

@@ -1,7 +1,5 @@
 package cl.rdrp.planilla_shopper.ui;
 
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_KM;
-import static cl.rdrp.planilla_shopper.util.Config.VALOR_UNIT_SKU;
 import static cl.rdrp.planilla_shopper.util.Config.basePorSku;
 
 import android.view.LayoutInflater;
@@ -66,7 +64,7 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
 
         // Cálculos por fila
         int base   = basePorSku(skuQty);
-        int sSku   = skuQty * VALOR_UNIT_SKU;
+        int sSku   = skuQty * Config.getValorUnitSku();
         long sKm   = Config.calcularTotalKm(r.km, r.fecha); // KM con decimales → pesos // modif cuando pase contingencia
 
         // 💰 bono por km según fecha

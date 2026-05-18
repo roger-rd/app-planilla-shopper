@@ -1,26 +1,63 @@
 package cl.rdrp.planilla_shopper.util;
 
-import java.util.Calendar;
+import cl.rdrp.planilla_shopper.App;
 
+/**
+ * Parametros de calculo y reglas de negocio.
+ *
+ * Desde Fase 4b, los 5 parametros configurables (valor por SKU, comision,
+ * rendimiento km/litro, precio litro, bono por km dom/lun/mar) viven en
+ * SharedPreferences a traves de Prefs.* y se exponen aqui via metodos
+ * getter estaticos. Los valores DEFAULT_* son los que se usan cuando el
+ * usuario nunca toco la pantalla de parametros (comportamiento original).
+ *
+ * Lo que NO es configurable y permanece duro:
+ *   - VALOR_UNIT_KM (constante referencial historica, no se usa en calculos)
+ *   - basePorSku() (tramos hardcoded por SKU)
+ *   - calcularBonoKm() (regla de dia de la semana y fecha de corte 2026-03-01)
+ *   - getValorKm() (logica historica $234/$276 con corte 2026-03-26)
+ *
+ * Lo anterior se decidio para no romper calculos historicos. Si en el
+ * futuro se quieren editar, requeriria estrategia de versionado por fecha.
+ */
 public class Config {
-    public static final double RENDIMIENTO_KM_POR_LITRO = 10.0;
-    public static final int PRECIO_LITRO = 1200;
-    public static final double COMISION_PORC = 0.1525; // 15.25%
 
-    public static final int VALOR_UNIT_SKU = 61;   // $ por SKU
-    public static final double VALOR_UNIT_KM = 234.0; // $ por KM (KM es double)
-    public static final Double BONO_POR_KM_DOM_LUN_MAR = 100.0; // BONO DOMINGO, LUNES, MARTES
+    // Constante referencial historica (no se usa en calculos)
+    public static final double VALOR_UNIT_KM = 234.0;
 
     // ===== Defaults para SharedPreferences (Fase 4a) =====
-    // Deben ser EXACTAMENTE iguales a las constantes legacy de arriba.
-    // En Fase 4b los metodos de Config van a leer desde Prefs usando estos
-    // defaults; mientras nadie llame a Prefs.set*, el comportamiento sigue
-    // siendo identico. El ConfigTest verifica que default == legacy.
+    // Si Prefs no tiene valor, los getters de abajo retornan estos defaults.
+    // El comportamiento de la app es identico al original mientras el
+    // usuario no edite parametros desde ParametrosCalculosActivity.
     public static final int    DEFAULT_VALOR_UNIT_SKU            = 61;
     public static final double DEFAULT_COMISION_PORC             = 0.1525;
     public static final double DEFAULT_RENDIMIENTO_KM_POR_LITRO  = 10.0;
     public static final int    DEFAULT_PRECIO_LITRO              = 1200;
     public static final double DEFAULT_BONO_POR_KM_DOM_LUN_MAR   = 100.0;
+
+    // ===== Getters de parametros configurables (Fase 4b) =====
+
+    public static int getValorUnitSku() {
+        return Prefs.getValorUnitSku(App.get());
+    }
+
+    public static double getComisionPorc() {
+        return Prefs.getComisionPorc(App.get());
+    }
+
+    public static double getRendimientoKmPorLitro() {
+        return Prefs.getRendimientoKmPorLitro(App.get());
+    }
+
+    public static int getPrecioLitro() {
+        return Prefs.getPrecioLitro(App.get());
+    }
+
+    public static double getBonoPorKmDomLunMar() {
+        return Prefs.getBonoPorKmDomLunMar(App.get());
+    }
+
+    // ===== Reglas duras (no configurables) =====
 
     public static int basePorSku(int skuQty) {
         if (skuQty <= 0) return 0;
@@ -60,8 +97,8 @@ public class Config {
                             (aplicaDomingo && day == java.util.Calendar.SUNDAY);
             if(!aplica) return 0.0;
 
-            // $100 por km recorrido
-            return (double) Math.round(km * BONO_POR_KM_DOM_LUN_MAR);
+            // monto por km recorrido (configurable desde Prefs)
+            return (double) Math.round(km * getBonoPorKmDomLunMar());
 
         } catch (Exception e) {
             return 0.0; // si falla el parseo, mejor no dar bono
@@ -98,5 +135,3 @@ public class Config {
     }
 
 }
-
-
