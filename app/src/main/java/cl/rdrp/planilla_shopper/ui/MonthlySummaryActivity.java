@@ -19,6 +19,7 @@ import cl.rdrp.planilla_shopper.databinding.ActivityMonthlySummaryBinding;
 import cl.rdrp.planilla_shopper.data.BonoDao;
 import cl.rdrp.planilla_shopper.data.CombustibleDao;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.Parsers;
 
 
 public class MonthlySummaryActivity extends AppCompatActivity {
@@ -94,7 +95,7 @@ public class MonthlySummaryActivity extends AppCompatActivity {
             for (Registro r : items) {
                 dias.add(r.fecha);
 
-                int skuQty = parseIntOnlyDigits(r.sku);
+                int skuQty = Parsers.parseIntOrZero(r.sku);
                 totalSku += skuQty;
                 totalKm += r.km;
 
@@ -163,14 +164,6 @@ public class MonthlySummaryActivity extends AppCompatActivity {
     private static String formatoMes(Calendar c) {
         return String.format(Locale.US, "%04d-%02d",
                 c.get(Calendar.YEAR), (c.get(Calendar.MONTH) + 1));
-    }
-
-
-    private static int parseIntOnlyDigits(String s) {
-        if (s == null) return 0;
-        s = s.trim().replaceAll("[^0-9]", "");
-        if (s.isEmpty()) return 0;
-        try { return Integer.parseInt(s); } catch (NumberFormatException e) { return 0; }
     }
 
 
