@@ -11,13 +11,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
 import cl.rdrp.planilla_shopper.data.Combustible;
+import cl.rdrp.planilla_shopper.util.Fechas;
+import cl.rdrp.planilla_shopper.util.Texts;
 
 public class BencinaActivity extends AppCompatActivity {
 
@@ -78,13 +78,13 @@ public class BencinaActivity extends AppCompatActivity {
     }
 
     private void guardarBencina() {
-        String fecha     = hoyEnISO();
+        String fecha     = Fechas.hoyISO();
         String bencinera = spBencinera.getSelectedItem().toString();
         String tipo      = spTipoBencina.getSelectedItem().toString();
-        String kmAntS    = s(etKmAnterior.getText());
-        String kmActS    = s(etKmActual.getText());
-        String valorS    = s(etValor.getText());
-        String litrosS   = s(etLitros.getText());
+        String kmAntS    = Texts.s(etKmAnterior.getText());
+        String kmActS    = Texts.s(etKmActual.getText());
+        String valorS    = Texts.s(etValor.getText());
+        String litrosS   = Texts.s(etLitros.getText());
 
         if (fecha.isEmpty() || bencinera.isEmpty() || tipo.isEmpty() ||
                 kmAntS.isEmpty() || kmActS.isEmpty() ||
@@ -170,7 +170,7 @@ public class BencinaActivity extends AppCompatActivity {
 
     private void limpiarCampos() {
         // Dejamos el kmAnterior con el último kmActual
-        String kmActS = s(etKmActual.getText());
+        String kmActS = Texts.s(etKmActual.getText());
         if (!kmActS.isEmpty()) {
             etKmAnterior.setText(kmActS);
         }
@@ -180,14 +180,4 @@ public class BencinaActivity extends AppCompatActivity {
         // tvResumen lo dejamos con el último resultado para que lo vea
     }
 
-    // ==== Helpers ====
-
-    private static String hoyEnISO() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return sdf.format(new Date());
-    }
-
-    private static String s(CharSequence cs) {
-        return cs == null ? "" : cs.toString().trim();
-    }
 }
