@@ -21,6 +21,7 @@ import java.util.List;
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.Parsers;
 
 public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
 
@@ -60,7 +61,7 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
         Registro r = data.get(i);
 
         // SKU en DB es String → obtener cantidad (solo dígitos)
-        Integer skuQtyI = parseIntOnlyDigits(r.sku);
+        Integer skuQtyI = Parsers.parseIntOrNull(r.sku);
         int skuQty = (skuQtyI == null ? 0 : skuQtyI);
 
         // Cálculos por fila
@@ -114,16 +115,6 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
     @Override
     public int getItemCount() {
         return data.size();
-    }
-
-    // === Helpers ===
-    /** extrae solo dígitos de un String y los parsea a int */
-    private static Integer parseIntOnlyDigits(String s) {
-        if (s == null) return null;
-        s = s.trim().replaceAll("[^0-9]", "");
-        if (s.isEmpty()) return null;
-        try { return Integer.parseInt(s); }
-        catch (NumberFormatException e) { return null; }
     }
 
     static class VH extends RecyclerView.ViewHolder {
