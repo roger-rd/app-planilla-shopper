@@ -11,6 +11,17 @@ public class Config {
     public static final double VALOR_UNIT_KM = 234.0; // $ por KM (KM es double)
     public static final Double BONO_POR_KM_DOM_LUN_MAR = 100.0; // BONO DOMINGO, LUNES, MARTES
 
+    // ===== Defaults para SharedPreferences (Fase 4a) =====
+    // Deben ser EXACTAMENTE iguales a las constantes legacy de arriba.
+    // En Fase 4b los metodos de Config van a leer desde Prefs usando estos
+    // defaults; mientras nadie llame a Prefs.set*, el comportamiento sigue
+    // siendo identico. El ConfigTest verifica que default == legacy.
+    public static final int    DEFAULT_VALOR_UNIT_SKU            = 61;
+    public static final double DEFAULT_COMISION_PORC             = 0.1525;
+    public static final double DEFAULT_RENDIMIENTO_KM_POR_LITRO  = 10.0;
+    public static final int    DEFAULT_PRECIO_LITRO              = 1200;
+    public static final double DEFAULT_BONO_POR_KM_DOM_LUN_MAR   = 100.0;
+
     public static int basePorSku(int skuQty) {
         if (skuQty <= 0) return 0;
         if (skuQty <= 10) return 2623;
