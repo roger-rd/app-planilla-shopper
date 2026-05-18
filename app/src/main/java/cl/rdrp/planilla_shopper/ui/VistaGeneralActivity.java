@@ -32,6 +32,7 @@ import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.Parsers;
 
 public class VistaGeneralActivity extends AppCompatActivity {
 
@@ -151,7 +152,7 @@ public class VistaGeneralActivity extends AppCompatActivity {
             long totalDiaBonoKm = 0;
 
             for (Registro r : regs) {
-                int skuQty = parseIntOnlyDigits(r.sku);
+                int skuQty = Parsers.parseIntOrZero(r.sku);
                 int base   = basePorSku(skuQty);
                 int sSku   = skuQty * VALOR_UNIT_SKU;
                 long sKm   = Config.calcularTotalKm(r.km, r.fecha);
@@ -229,10 +230,4 @@ public class VistaGeneralActivity extends AppCompatActivity {
         btnHasta.setText(hastaSel);
     }
 
-    private static int parseIntOnlyDigits(String s) {
-        if (s == null) return 0;
-        s = s.trim().replaceAll("[^0-9]", "");
-        if (s.isEmpty()) return 0;
-        try { return Integer.parseInt(s); } catch (Exception e) { return 0; }
-    }
 }
