@@ -16,7 +16,6 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -31,6 +30,8 @@ import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.data.RegistroDao;
 import cl.rdrp.planilla_shopper.databinding.ActivityDashboardBinding;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.Fechas;
+import cl.rdrp.planilla_shopper.util.Parsers;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -58,7 +59,7 @@ public class DashboardActivity extends AppCompatActivity {
         et.setFocusable(false);
         et.setOnClickListener(v -> mostrarDatePicker());
         if (isEmpty(et.getText())) {
-            et.setText(hoyISO()); // "yyyy-MM-dd"
+            et.setText(Fechas.hoyISO()); // "yyyy-MM-dd"
         }
 
         // Cargar resumen por la fecha mostrada
@@ -70,9 +71,8 @@ public class DashboardActivity extends AppCompatActivity {
     private void mostrarDatePicker() {
         Calendar cal = Calendar.getInstance();
         String actual = safeText(vb.etFechaDash.getText());
-        SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         try {
-            if (!actual.isEmpty()) cal.setTime(f.parse(actual));
+            if (!actual.isEmpty()) cal.setTime(Fechas.parseISO(actual));
         } catch (Exception ignored) {}
 
         int y = cal.get(Calendar.YEAR);
@@ -88,23 +88,9 @@ public class DashboardActivity extends AppCompatActivity {
 
     // ===================== Carga y cálculo =====================
 
-    private static String toLegacy(String iso) {
-        if (iso == null) return "";
-        iso = iso.trim();
-        if (iso.length() < 10) return iso;
-        try {
-            String y = iso.substring(0,4);
-            String m = iso.substring(5,7);
-            String d = iso.substring(8,10);
-            return d + "/" + m + "/" + y;
-        } catch (Exception e) {
-            return iso;
-        }
-    }
-
     private void cargarResumen(String fechaISO) {
         final String iso = (fechaISO == null) ? "" : fechaISO.trim();
-        final String legacy = toLegacy(iso);
+        final String legacy = Fechas.toLegacy(iso);
 
         exec.execute(() -> {
             // Registros del día
@@ -120,7 +106,7 @@ public class DashboardActivity extends AppCompatActivity {
             double totalKm = 0.0;
 
             for (Registro r : items) {
-                Integer skuQtyI = parseIntOnlyDigits(r.sku);
+                Integer skuQtyI = Parsers.parseIntOrNull(r.sku);
                 int skuQty = (skuQtyI == null ? 0 : skuQtyI);
 
                 int  base   = basePorSku(skuQty);               // 👈 ahora viene de Config
@@ -277,25 +263,12 @@ public class DashboardActivity extends AppCompatActivity {
 
     // ===================== Helpers =====================
 
-    private static String hoyISO() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        return sdf.format(new java.util.Date());
-    }
-
     private static boolean isEmpty(CharSequence cs){
         return cs == null || cs.toString().trim().isEmpty();
     }
 
     private static String safeText(CharSequence cs){
         return cs == null ? "" : cs.toString();
-    }
-
-    /** Extrae solo dígitos de un String y los parsea a int */
-    private static Integer parseIntOnlyDigits(String s) {
-        if (s == null) return null;
-        s = s.trim().replaceAll("[^0-9]", "");
-        if (s.isEmpty()) return null;
-        try { return Integer.parseInt(s); } catch (NumberFormatException e) { return null; }
     }
 
     @Override
