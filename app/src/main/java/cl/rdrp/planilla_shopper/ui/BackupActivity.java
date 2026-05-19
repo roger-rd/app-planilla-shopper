@@ -10,12 +10,16 @@ import java.util.List;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
+import cl.rdrp.planilla_shopper.data.BonoExtra;
 import cl.rdrp.planilla_shopper.data.Registro;
 
 public class BackupActivity extends AppCompatActivity {
 
     private static final int REQ_EXPORT_BACKUP = 1001;
     private static final int REQ_IMPORT_BACKUP = 1002;
+
+    /** Version del formato JSON que escribimos al exportar (Fase 5). */
+    private static final int BACKUP_VERSION_CURRENT = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,9 +35,21 @@ public class BackupActivity extends AppCompatActivity {
     }
 
     // === MODELO CONTENEDOR DE BACKUP ===
+    //
+    // Historial de versiones:
+    //   V1 (pre-Fase 5): {registros, combustibles}, sin campo "version".
+    //   V2 (Fase 5):     {version, registros, combustibles, bonos}.
+    //
+    // Al importar:
+    //   - Si el JSON no trae "version" -> Gson deja en 0 -> tratamos como V1.
+    //   - Si version >= 2 -> tratamos como V2 y restauramos bonos.
+    //   - Bonos NO se borran en restauracion de V1 (preservacion: el backup
+    //     viejo no los conocia, no los podemos restaurar).
     public static class BackupData {
+        public int version;
         public java.util.List<cl.rdrp.planilla_shopper.data.Registro> registros;
         public java.util.List<cl.rdrp.planilla_shopper.data.Combustible> combustibles;
+        public java.util.List<BonoExtra> bonos;
     }
 
     // === CREAR ARCHIVO PARA EXPORTAR ===
@@ -83,8 +99,10 @@ public class BackupActivity extends AppCompatActivity {
                 cl.rdrp.planilla_shopper.data.AppDatabase db = cl.rdrp.planilla_shopper.data.AppDatabase.get(this);
 
                 BackupData backup = new BackupData();
+                backup.version       = BACKUP_VERSION_CURRENT;       // V2
                 backup.registros     = db.registroDao().getAllSync();
                 backup.combustibles  = db.combustibleDao().getAllSync();
+                backup.bonos         = db.bonoDao().getAllSync();    // NUEVO en V2
 
                 com.google.gson.Gson gson = new com.google.gson.Gson();
                 String json = gson.toJson(backup);
@@ -130,12 +148,15 @@ public class BackupActivity extends AppCompatActivity {
 
                 cl.rdrp.planilla_shopper.data.AppDatabase db = cl.rdrp.planilla_shopper.data.AppDatabase.get(this);
 
+                // Detectar version: si no viene el campo, Gson deja 0 -> V1.
+                final int version = (backup != null) ? backup.version : 0;
+                final boolean isV2OrMas = version >= 2;
+
                 db.runInTransaction(() -> {
-                    // borra TODO lo actual
+                    // Registros y combustibles: SIEMPRE delete + insert
                     db.registroDao().deleteAllSync();
                     db.combustibleDao().deleteAllSync();
 
-                    // inserta lo del backup si viene algo
                     if (backup != null) {
                         if (backup.registros != null && !backup.registros.isEmpty()) {
                             db.registroDao().insertAllSync(backup.registros);
@@ -143,12 +164,23 @@ public class BackupActivity extends AppCompatActivity {
                         if (backup.combustibles != null && !backup.combustibles.isEmpty()) {
                             db.combustibleDao().insertAllSync(backup.combustibles);
                         }
+
+                        // Bonos: SOLO si V2+ (V1 no los conocia, los preservamos)
+                        if (isV2OrMas) {
+                            db.bonoDao().deleteAllSync();
+                            if (backup.bonos != null && !backup.bonos.isEmpty()) {
+                                db.bonoDao().insertAllSync(backup.bonos);
+                            }
+                        }
                     }
                 });
 
-                runOnUiThread(() ->
-                        android.widget.Toast.makeText(this, "Datos importados correctamente", android.widget.Toast.LENGTH_LONG).show()
-                );
+                runOnUiThread(() -> {
+                    String msg = isV2OrMas
+                            ? "Backup V2 importado completo (registros, combustibles y bonos)"
+                            : "Backup V1 importado — los bonos actuales se mantuvieron (no estaban en el backup)";
+                    android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_LONG).show();
+                });
             } catch (Exception e) {
                 e.printStackTrace();
                 runOnUiThread(() ->

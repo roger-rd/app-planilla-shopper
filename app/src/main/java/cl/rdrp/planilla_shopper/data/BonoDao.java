@@ -29,5 +29,15 @@ public interface BonoDao {
     @Query("SELECT DISTINCT fecha FROM bonos WHERE fecha BETWEEN :desde AND :hasta")
     List<String> listFechasConBonos(String desde, String hasta);
 
+    // ===== Para backup (Fase 5) =====
+
+    @Query("SELECT * FROM bonos")
+    List<BonoExtra> getAllSync();
+
+    @Query("DELETE FROM bonos")
+    void deleteAllSync();
+
+    @Insert
+    void insertAllSync(List<BonoExtra> items);
 
 }
