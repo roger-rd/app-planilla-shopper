@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -9,12 +10,130 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- ===== Card editable (Fase 4c) ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_editar_parametros"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Editar parámetros"
+                    android:textStyle="bold"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    android:text="Estos cambios afectan los cálculos de todos los días (pasados y futuros). Los tramos por SKU, los valores de KM por fecha y las reglas de día de la semana NO son configurables." />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Valor por SKU ($)">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etValorSku"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Comisión (%)"
+                    app:helperText="Ej: 15.25 (no 0.1525)">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etComision"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Rendimiento (km / litro)">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etRendimiento"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Precio del litro ($)">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etPrecioLitro"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:hint="Bono por km (lun/mar) ($)">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etBonoKm"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="numberDecimal" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp"
+                    android:gravity="end">
+
+                    <Button
+                        android:id="@+id/btnRestaurarParams"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Restaurar defaults" />
+
+                    <Button
+                        android:id="@+id/btnGuardarParams"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Guardar" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Separador -->
         <View
             android:layout_width="match_parent"
             android:layout_height="16dp" />
 
-        <!-- Ventana: Parámetros de cálculo -->
+        <!-- ===== Card informativa: valores vigentes (refleja Prefs) ===== -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_parametros"
             android:layout_width="match_parent"
@@ -33,7 +152,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Parámetros de cálculo"
+                    android:text="Valores vigentes"
                     android:textStyle="bold"
                     android:textSize="16sp" />
                 <TextView
