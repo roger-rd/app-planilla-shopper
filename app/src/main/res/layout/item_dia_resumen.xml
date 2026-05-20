@@ -1,48 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp"
-    android:background="@color/blue_surface"
-    android:layout_marginBottom="10dp">
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <TextView
-            android:id="@+id/tvFecha"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        <!-- Header: fecha + total + icono expand -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="@color/blue_onSurface" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvFecha"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/blue_onSurface" />
+
+            <TextView
+                android:id="@+id/tvTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@color/blue_primary" />
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_expand_more_24"
+                app:tint="@color/blue_onSurface"
+                android:contentDescription="Expandir / colapsar" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/tvTotal"
+            android:id="@+id/tvPedidos"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="@color/blue_onSurface" />
+            android:textSize="13sp"
+            android:textColor="@color/blue_onSurface"
+            android:alpha="0.7"
+            android:layout_marginTop="4dp" />
+
+        <!-- Detalle (visibility controlada por el adapter) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvDetalle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_marginTop="12dp"
+            android:nestedScrollingEnabled="false" />
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvPedidos"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/blue_onSurface"
-        android:layout_marginTop="4dp"/>
-
-    <!-- detalle -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvDetalle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_marginTop="10dp"
-        android:nestedScrollingEnabled="false"/>
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

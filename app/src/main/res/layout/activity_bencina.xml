@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardBackgroundColor="@android:color/white"
+            app:cardBackgroundColor="@color/blue_surface"
             app:cardCornerRadius="20dp"
             app:cardElevation="2dp">
 
@@ -120,7 +120,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardBackgroundColor="@android:color/white"
+            app:cardBackgroundColor="@color/blue_surface"
             app:cardCornerRadius="20dp"
             app:cardElevation="2dp">
 
@@ -194,7 +194,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            app:cardBackgroundColor="@android:color/white"
+            app:cardBackgroundColor="@color/blue_surface"
             app:cardCornerRadius="20dp"
             app:cardElevation="2dp">
 
