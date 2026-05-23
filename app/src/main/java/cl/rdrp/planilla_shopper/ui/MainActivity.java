@@ -183,6 +183,60 @@ public class MainActivity extends AppCompatActivity {
         if (!Prefs.hasModalidad(this)) {
             mostrarPopupBienvenidaModalidad();
         }
+
+        // Aplicar visibilidad de campos segun modalidad (N2)
+        aplicarVisibilidadPorModalidad();
+    }
+
+    /**
+     * Oculta/muestra los campos SKU y KM segun la modalidad actual (N2).
+     * Solo afecta al formulario de NUEVO registro; el dialogo de edicion
+     * sigue mostrando todos los campos para no perder funcionalidad al
+     * editar registros viejos hechos en otra modalidad.
+     *
+     *   SHOPPER -> ambos visibles, weight 1 cada uno (estado original).
+     *   PICKER  -> oculta KM. SKU ocupa la fila completa (weight 2).
+     *   DRIVER  -> oculta SKU. KM ocupa la fila completa (weight 2).
+     */
+    private void aplicarVisibilidadPorModalidad() {
+        Modalidad m = Prefs.getModalidad(this);
+
+        com.google.android.material.textfield.TextInputLayout tilSku =
+                findViewById(R.id.tilSku);
+        com.google.android.material.textfield.TextInputLayout tilKm =
+                findViewById(R.id.tilKm);
+
+        // Reset a default (ambos visibles, weight 1) y desde ahi ajustar.
+        setRowVisibility(tilSku, true,  1f);
+        setRowVisibility(tilKm,  true,  1f);
+
+        switch (m) {
+            case PICKER:
+                // Sin KM: el campo SKU ocupa ancho completo.
+                setRowVisibility(tilKm,  false, 1f);
+                setRowVisibility(tilSku, true,  2f);
+                break;
+            case DRIVER:
+                // Sin SKU: el campo KM ocupa ancho completo.
+                setRowVisibility(tilSku, false, 1f);
+                setRowVisibility(tilKm,  true,  2f);
+                break;
+            case SHOPPER:
+            default:
+                // Ambos visibles con weight 1 (ya quedo seteado arriba).
+                break;
+        }
+    }
+
+    /** Helper que ajusta visibility + layout_weight de un hijo de LinearLayout horizontal. */
+    private static void setRowVisibility(android.view.View v, boolean visible, float weight) {
+        if (v == null) return;
+        v.setVisibility(visible ? android.view.View.VISIBLE : android.view.View.GONE);
+        android.view.ViewGroup.LayoutParams lp = v.getLayoutParams();
+        if (lp instanceof android.widget.LinearLayout.LayoutParams) {
+            ((android.widget.LinearLayout.LayoutParams) lp).weight = weight;
+            v.setLayoutParams(lp);
+        }
     }
 
     /**
@@ -259,6 +313,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this,
                             "Modalidad: " + m.getLabel(),
                             Toast.LENGTH_SHORT).show();
+                    // N2: aplicar la nueva visibilidad de campos inmediatamente
+                    aplicarVisibilidadPorModalidad();
                 }
                 dialog.dismiss();
             });
@@ -409,6 +465,17 @@ public class MainActivity extends AppCompatActivity {
         String sgS      = Texts.s(vb.etSg.getText());
         String ventanaS = Texts.s(vb.etVentana.getText());
         String cantS    = Texts.s(vb.etCant.getText());
+
+        // N2: si la modalidad oculta un campo, asignar default para que el
+        // resto del flujo (validacion y guardado) trate al campo como si
+        // tuviera valor cero. Esto permite a PICKER/DRIVER guardar sin
+        // tener que llenar lo que no aplica.
+        Modalidad modalidad = Prefs.getModalidad(this);
+        if (modalidad == Modalidad.PICKER) {
+            kmS = "0";  // Picker no usa KM
+        } else if (modalidad == Modalidad.DRIVER) {
+            sku = "0";  // Driver no usa SKU
+        }
 
         // Guarda LOCAL predeterminado si no existe
         if (!Prefs.hasLocal(this)) {

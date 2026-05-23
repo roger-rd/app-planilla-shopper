@@ -211,6 +211,7 @@
                             android:weightSum="2">
 
                             <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilSku"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginEnd="6dp"
@@ -231,6 +232,7 @@
                             </com.google.android.material.textfield.TextInputLayout>
 
                             <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilKm"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="6dp"
