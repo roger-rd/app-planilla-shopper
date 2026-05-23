@@ -3,18 +3,18 @@ package cl.rdrp.planilla_shopper.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import cl.rdrp.planilla_shopper.data.Modalidad;
+
 /**
  * Wrapper sobre SharedPreferences para guardar configuracion de la app.
  *
  * Convencion de keys:
  *   - "local_default"           -> nombre del local default del usuario
  *   - "param_*"                 -> parametros de calculo (Fase 4a)
+ *   - "modalidad_actual"        -> modalidad de trabajo del usuario (N1)
  *
  * Los defaults numericos se toman de Config.DEFAULT_* para mantenerlos en
  * un unico lugar. Si esos defaults cambian, automaticamente cambian aqui.
- *
- * Los metodos param_* fueron agregados en Fase 4a y NO se usan todavia
- * desde ningun lado del codigo. La conexion con Config viene en Fase 4b.
  */
 public class Prefs {
 
@@ -28,6 +28,9 @@ public class Prefs {
     private static final String K_RENDIMIENTO_KM_LITRO   = "param_rendimiento_km_litro";
     private static final String K_PRECIO_LITRO           = "param_precio_litro";
     private static final String K_BONO_KM_DOM_LUN_MAR    = "param_bono_km_dom_lun_mar";
+
+    // Key de modalidad de trabajo (N1)
+    private static final String K_MODALIDAD              = "modalidad_actual";
 
     private static SharedPreferences prefs(Context c) {
         return c.getSharedPreferences(NAME, Context.MODE_PRIVATE);
@@ -94,5 +97,27 @@ public class Prefs {
     }
     public static void setBonoPorKmDomLunMar(Context c, double v) {
         prefs(c).edit().putString(K_BONO_KM_DOM_LUN_MAR, Double.toString(v)).apply();
+    }
+
+    // ===== Modalidad de trabajo (N1) =====
+
+    /**
+     * Devuelve la modalidad activa. Si no hay valor guardado retorna SHOPPER
+     * (fallback seguro: comportamiento original de la app).
+     */
+    public static Modalidad getModalidad(Context c) {
+        return Modalidad.fromName(prefs(c).getString(K_MODALIDAD, null));
+    }
+
+    public static void setModalidad(Context c, Modalidad m) {
+        prefs(c).edit().putString(K_MODALIDAD, m.name()).apply();
+    }
+
+    /**
+     * True si el usuario ya eligio alguna modalidad. Sirve para detectar
+     * el primer arranque y disparar el popup de bienvenida.
+     */
+    public static boolean hasModalidad(Context c) {
+        return prefs(c).getString(K_MODALIDAD, null) != null;
     }
 }

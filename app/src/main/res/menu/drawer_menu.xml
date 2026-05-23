@@ -17,7 +17,10 @@
             android:title="Calculos Parametros"
             android:icon="@android:drawable/ic_menu_view" />
 
-
+        <item
+            android:id="@+id/nav_modalidad"
+            android:title="Modalidad de trabajo"
+            android:icon="@android:drawable/ic_menu_preferences" />
 
         <item
             android:id="@+id/nav_bencina"

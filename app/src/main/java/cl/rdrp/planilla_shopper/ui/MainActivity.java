@@ -15,6 +15,7 @@ import java.util.Locale;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
+import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.databinding.ActivityMainBinding;
 import cl.rdrp.planilla_shopper.util.Fechas;
@@ -96,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else if (id == R.id.nav_calculo) {
                 startActivity(new Intent(this, ParametrosCalculosActivity.class));
+            } else if (id == R.id.nav_modalidad) {
+                mostrarDialogoCambiarModalidad();
             } else if (id == R.id.nav_backup) {
                 startActivity(new Intent(this, BackupActivity.class));
             }else if (id == R.id.nav_bencina) {
@@ -175,6 +178,93 @@ public class MainActivity extends AppCompatActivity {
 
         // Botón "Agregar bono"
                 vb.btnAgregarBono.setOnClickListener(v -> mostrarDialogoBono());
+
+        // Popup de bienvenida si nunca eligio modalidad (N1)
+        if (!Prefs.hasModalidad(this)) {
+            mostrarPopupBienvenidaModalidad();
+        }
+    }
+
+    /**
+     * Popup no-cancelable que pide elegir modalidad la primera vez que
+     * el usuario abre la app. Solo se muestra una vez (despues hasModalidad
+     * retorna true).
+     */
+    private void mostrarPopupBienvenidaModalidad() {
+        mostrarDialogoModalidad(
+                "¡Bienvenido! Elige tu modalidad",
+                "Para empezar, indica cuál es tu modalidad de trabajo. " +
+                        "Puedes cambiarla después desde el menú lateral.",
+                null,           // sin modalidad actual (es la primera vez)
+                false           // no se puede cancelar
+        );
+    }
+
+    /**
+     * Dialogo para cambiar de modalidad desde el drawer. Muestra la actual
+     * seleccionada y permite cancelar sin cambios.
+     */
+    private void mostrarDialogoCambiarModalidad() {
+        Modalidad actual = Prefs.getModalidad(this);
+        mostrarDialogoModalidad(
+                "Modalidad de trabajo",
+                "Modalidad actual: " + actual.getLabel() + ". Tocá una opción para cambiar.",
+                actual,         // la actual se destaca visualmente
+                true            // permite cancelar
+        );
+    }
+
+    /**
+     * Helper unico para los dos popups de modalidad (bienvenida y cambio).
+     * Infla dialog_modalidad.xml con 3 MaterialCardView clickeables y
+     * destaca la modalidad actual (si se pasa) cambiandole el tinte.
+     */
+    private void mostrarDialogoModalidad(String titulo,
+                                         String intro,
+                                         Modalidad actual,
+                                         boolean cancelable) {
+        android.view.View view = android.view.LayoutInflater.from(this)
+                .inflate(R.layout.dialog_modalidad, null);
+
+        ((android.widget.TextView) view.findViewById(R.id.tvDialogModalidadIntro))
+                .setText(intro);
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder b =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                        .setTitle(titulo)
+                        .setView(view)
+                        .setCancelable(cancelable);
+        if (cancelable) b.setNegativeButton("Cancelar", null);
+        androidx.appcompat.app.AlertDialog dialog = b.create();
+
+        // Mapeo card -> modalidad para el handler
+        java.util.Map<Integer, Modalidad> cards = new java.util.HashMap<>();
+        cards.put(R.id.cardShopper, Modalidad.SHOPPER);
+        cards.put(R.id.cardPicker,  Modalidad.PICKER);
+        cards.put(R.id.cardDriver,  Modalidad.DRIVER);
+
+        for (java.util.Map.Entry<Integer, Modalidad> e : cards.entrySet()) {
+            com.google.android.material.card.MaterialCardView card = view.findViewById(e.getKey());
+            Modalidad m = e.getValue();
+
+            // Destacar la actual: card con tinte primaryContainer
+            if (actual != null && m == actual) {
+                card.setCardBackgroundColor(
+                        androidx.core.content.ContextCompat.getColor(this, R.color.blue_primaryContainer));
+            }
+
+            card.setOnClickListener(v -> {
+                if (actual == null || m != actual) {
+                    Prefs.setModalidad(this, m);
+                    Toast.makeText(this,
+                            "Modalidad: " + m.getLabel(),
+                            Toast.LENGTH_SHORT).show();
+                }
+                dialog.dismiss();
+            });
+        }
+
+        dialog.show();
     }
 
 
