@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Locale;
 
 import cl.rdrp.planilla_shopper.R;
+import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.util.Config;
 import cl.rdrp.planilla_shopper.util.Parsers;
@@ -42,8 +43,12 @@ public class PedidoDetalleAdapter extends RecyclerView.Adapter<PedidoDetalleAdap
         Registro r = data.get(pos);
 
         int skuQty = Parsers.parseIntOrZero(r.sku);
+
+        // N4: parametros segun la modalidad del registro (no la activa)
+        Modalidad m = Modalidad.fromName(r.modalidad);
+
         int base   = basePorSku(skuQty);
-        int sSku   = skuQty * Config.getValorUnitSku();
+        int sSku   = skuQty * Config.getValorUnitSku(m);
         long sKm   = Config.calcularTotalKm(r.km, r.fecha); // modificar cuando pase contingencia
         long total = base + sSku + sKm;
 
@@ -58,18 +63,29 @@ public class PedidoDetalleAdapter extends RecyclerView.Adapter<PedidoDetalleAdap
                         "  KM " + clp.format(sKm)
         );
         h.tvTotal.setText(clp.format(total));
+
+        // N4: chip de modalidad solo visible si NO es Shopper
+        if (h.tvChipModalidad != null) {
+            if (m != Modalidad.SHOPPER) {
+                h.tvChipModalidad.setText(m.getLabel().toUpperCase(Locale.ROOT));
+                h.tvChipModalidad.setVisibility(View.VISIBLE);
+            } else {
+                h.tvChipModalidad.setVisibility(View.GONE);
+            }
+        }
     }
 
     @Override
     public int getItemCount() { return data.size(); }
 
     static class VH extends RecyclerView.ViewHolder {
-        TextView tvTitulo, tvDetalle, tvTotal;
+        TextView tvTitulo, tvDetalle, tvTotal, tvChipModalidad;
         VH(@NonNull View itemView) {
             super(itemView);
             tvTitulo = itemView.findViewById(R.id.tvTitulo);
             tvDetalle = itemView.findViewById(R.id.tvDetalle);
             tvTotal = itemView.findViewById(R.id.tvTotal);
+            tvChipModalidad = itemView.findViewById(R.id.tvChipModalidad);
         }
     }
 

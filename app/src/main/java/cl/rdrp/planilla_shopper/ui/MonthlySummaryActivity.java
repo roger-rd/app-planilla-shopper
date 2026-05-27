@@ -11,6 +11,7 @@ import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Executor;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
+import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.data.RegistroDao;
 import cl.rdrp.planilla_shopper.databinding.ActivityMonthlySummaryBinding;
@@ -90,6 +91,12 @@ public class MonthlySummaryActivity extends AppCompatActivity {
             long totalMes$ = 0; // total de registros (sin bonos)
             long bonoKm$ = 0;
 
+            // N4: comision per-registro. Cada registro contribuye su propia
+            // comision al acumulador, usando los parametros de SU modalidad.
+            // Asi un mes con registros mezclados (parte Shopper, parte
+            // Driver) suma correctamente la comision de cada uno.
+            double descImpuestoAcum = 0.0;
+
             for (Registro r : items) {
                 dias.add(r.fecha);
 
@@ -97,12 +104,20 @@ public class MonthlySummaryActivity extends AppCompatActivity {
                 totalSku += skuQty;
                 totalKm += r.km;
 
-                int base = basePorSku(skuQty);
-                int sSku = skuQty * Config.getValorUnitSku();
-                long sKm = Config.calcularTotalKm(r.km, r.fecha); // modif cuando pase contingencia
-                bonoKm$ += calcularBonoKm(r.km, r.fecha);
+                // Modalidad del registro
+                Modalidad m = Modalidad.fromName(r.modalidad);
 
-                totalMes$ += base + sSku + sKm;
+                int base = basePorSku(skuQty);
+                int sSku = skuQty * Config.getValorUnitSku(m);
+                long sKm = Config.calcularTotalKm(r.km, r.fecha); // modif cuando pase contingencia
+                double bonoKmReg = calcularBonoKm(r.km, r.fecha, m);
+                bonoKm$ += bonoKmReg;
+
+                long subtotalReg = base + sSku + sKm;
+                totalMes$ += subtotalReg;
+
+                // Comision per-registro (sobre subtotal + bono km del registro)
+                descImpuestoAcum += (subtotalReg + bonoKmReg) * Config.getComisionPorc(m);
             }
 
             // ✅ total final incluyendo bonos (una sola vez, fuera del for)
@@ -117,9 +132,13 @@ public class MonthlySummaryActivity extends AppCompatActivity {
             int promSkuPorPed = pedidosMes == 0 ? 0 : Math.round(totalSku / (float) pedidosMes);
             long promedioDiario$ = Math.round(totalConBonos$ / (double) diasTrabajados);
 
-            // ✅ Descuentos y líquido en base al total con bonos
+            // ✅ Descuentos y líquido
+            // Los bonosDB (manuales) no estan atados a un registro -> aplicamos
+            // la comision de la modalidad ACTIVA del usuario al monto de bonosDB.
+            // Cuando no hay mezcla de modalidades y la activa coincide, esto da
+            // exactamente igual al comportamiento previo a N4.
             double descGasolina = bencinaReal;
-            double descImpuesto = totalConBonos$ * Config.getComisionPorc();
+            double descImpuesto = descImpuestoAcum + (bonosDB * Config.getComisionPorc());
             double liquido = totalConBonos$ - descGasolina - descImpuesto;
 
             // Congelar valores para el UI thread

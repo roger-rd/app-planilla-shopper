@@ -97,8 +97,22 @@ public class Config {
     }
 
 
-    // Calcula el bono en pesos
+    // Calcula el bono en pesos usando el bono/km de la modalidad ACTIVA.
+    // Atajo para codigo legacy. Para usos per-registro, preferir el overload
+    // con (Modalidad m) y pasar la modalidad del registro.
     public static Double calcularBonoKm(double km, String fechaIso) {
+        return calcularBonoKm(km, fechaIso, Prefs.getModalidad(App.get()));
+    }
+
+    /**
+     * Calcula el bono por km usando el valor configurado para la modalidad
+     * indicada. Las reglas de fecha (dom/lun/mar pre-2026-03-01, lun/mar
+     * post) NO dependen de la modalidad: son reglas de negocio fijas.
+     *
+     * Lo unico que cambia entre modalidades es el monto por km (Prefs
+     * "param_{MODALIDAD}_bono_km_dom_lun_mar").
+     */
+    public static Double calcularBonoKm(double km, String fechaIso, Modalidad modalidad) {
         if (km <= 0) return 0.0;
         if (fechaIso == null || fechaIso.trim().isEmpty()) return 0.0;
 
@@ -122,8 +136,8 @@ public class Config {
                             (aplicaDomingo && day == java.util.Calendar.SUNDAY);
             if(!aplica) return 0.0;
 
-            // monto por km recorrido (configurable desde Prefs)
-            return (double) Math.round(km * getBonoPorKmDomLunMar());
+            // monto por km recorrido segun la modalidad del registro
+            return (double) Math.round(km * getBonoPorKmDomLunMar(modalidad));
 
         } catch (Exception e) {
             return 0.0; // si falla el parseo, mejor no dar bono

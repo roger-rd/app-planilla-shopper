@@ -24,6 +24,7 @@ import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
 import cl.rdrp.planilla_shopper.data.BonoDao;
 import cl.rdrp.planilla_shopper.data.BonoExtra;
+import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.data.RegistroDao;
 import cl.rdrp.planilla_shopper.databinding.ActivityDashboardBinding;
@@ -99,6 +100,13 @@ public class DashboardActivity extends AppCompatActivity {
             long totalBonosKm  = 0L;  // bonos automáticos por km
             long totalBonosExt = 0L;  // bonos extras (popup)
 
+            // N4: comision y combustible se acumulan per-registro usando
+            // los parametros de la modalidad de cada registro. Cuando todos
+            // los registros del dia son una misma modalidad, el resultado
+            // es matematicamente identico al comportamiento anterior.
+            double comisionAcum     = 0.0;
+            double combustibleAcum  = 0.0;
+
             // Métricas no monetarias
             int    pedidos = items.size();
             double totalKm = 0.0;
@@ -107,17 +115,30 @@ public class DashboardActivity extends AppCompatActivity {
                 Integer skuQtyI = Parsers.parseIntOrNull(r.sku);
                 int skuQty = (skuQtyI == null ? 0 : skuQtyI);
 
-                int  base   = basePorSku(skuQty);               // 👈 ahora viene de Config
-                int  sSku   = skuQty * Config.getValorUnitSku();
+                // Modalidad del registro
+                Modalidad m = Modalidad.fromName(r.modalidad);
+
+                int  base   = basePorSku(skuQty);
+                int  sSku   = skuQty * Config.getValorUnitSku(m);
                 long sKm    = Config.calcularTotalKm(r.km, r.fecha); //modif cuando pase contingencia
 
-                // bono km según fecha (solo domingo, lunes, martes)
-                double bonoKm = Config.calcularBonoKm(r.km, r.fecha);
+                // bono km según fecha (solo domingo, lunes, martes), monto segun modalidad
+                double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m);
                 double total = (long) base + sSku + sKm + bonoKm; // mismo total que en las cards
 
                 totalDia     += total;
                 totalKm      += r.km;
                 totalBonosKm += bonoKm;
+
+                // Comision per-registro (sobre subtotal + bono km del registro)
+                comisionAcum += total * Config.getComisionPorc(m);
+
+                // Combustible per-registro: km del registro contra rendimiento
+                // y precio de SU modalidad. Picker no usa KM (km=0) -> contribuye 0.
+                if (r.km > 0) {
+                    combustibleAcum +=
+                            (r.km / Config.getRendimientoKmPorLitro(m)) * Config.getPrecioLitro(m);
+                }
             }
 
             // Bonos extras guardados con el popup "+ bono"
@@ -129,12 +150,13 @@ public class DashboardActivity extends AppCompatActivity {
             // sumar bonos extra al total del día
             totalDia += totalBonosExt;
 
-            // Costos y comisiones (según tu Config)
-            long costoCombustible = Math.round(
-                    (totalKm / Config.getRendimientoKmPorLitro()) * Config.getPrecioLitro()
-            );
-            long comision = Math.round(totalDia * Config.getComisionPorc());
-            long liquido  = totalDia - comision - costoCombustible;
+            // Los bonos extras (manuales) no estan atados a un registro -> usar
+            // comision de la modalidad ACTIVA del usuario.
+            comisionAcum += totalBonosExt * Config.getComisionPorc();
+
+            long costoCombustible = Math.round(combustibleAcum);
+            long comision         = Math.round(comisionAcum);
+            long liquido          = totalDia - comision - costoCombustible;
 
             // Copias finales para la UI
             final int    pedidosF          = pedidos;
@@ -164,7 +186,13 @@ public class DashboardActivity extends AppCompatActivity {
                         "Combustible: " + kmTxt + " km (" + money.format(costoCombustibleF) + ")"
                 );
 
-                double porcentaje = Config.getComisionPorc() * 100.0;
+                // Porcentaje efectivo de comision sobre el total del dia.
+                // Cuando todos los registros son misma modalidad, coincide
+                // con la comision de esa modalidad. Cuando hay mezcla,
+                // refleja el promedio ponderado real.
+                double porcentaje = (totalDiaF > 0)
+                        ? (comisionF * 100.0 / totalDiaF)
+                        : (Config.getComisionPorc() * 100.0);
 
                 String texto = String.format(
                         Locale.US,

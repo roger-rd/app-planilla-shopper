@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Fondo del chip de modalidad (N4).
+  Solo se muestra en items cuyo registro NO es Shopper. Esquinas redondeadas,
+  fondo azul suave (secondaryContainer) para no competir visualmente con el
+  contenido principal del item.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <corners android:radius="8dp" />
+    <solid android:color="@color/blue_secondaryContainer" />
+</shape>

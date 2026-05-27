@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cl.rdrp.planilla_shopper.R;
+import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.util.Config;
 import cl.rdrp.planilla_shopper.util.Parsers;
@@ -62,13 +63,16 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
         Integer skuQtyI = Parsers.parseIntOrNull(r.sku);
         int skuQty = (skuQtyI == null ? 0 : skuQtyI);
 
+        // N4: parametros segun la modalidad del registro (no la activa)
+        Modalidad m = Modalidad.fromName(r.modalidad);
+
         // Cálculos por fila
         int base   = basePorSku(skuQty);
-        int sSku   = skuQty * Config.getValorUnitSku();
+        int sSku   = skuQty * Config.getValorUnitSku(m);
         long sKm   = Config.calcularTotalKm(r.km, r.fecha); // KM con decimales → pesos // modif cuando pase contingencia
 
-        // 💰 bono por km según fecha
-        double bonoKm = Config.calcularBonoKm(r.km, r.fecha);
+        // 💰 bono por km según fecha, usando bono de la modalidad del registro
+        double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m);
 
         // total ya incluye el bono
         double total = (long) base + sSku + sKm + bonoKm;
@@ -94,6 +98,16 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
             h.tvBonoKm.setVisibility(View.GONE);
         }
 
+        // N4: chip de modalidad solo visible si NO es Shopper
+        if (h.tvChipModalidad != null) {
+            if (m != Modalidad.SHOPPER) {
+                h.tvChipModalidad.setText(m.getLabel().toUpperCase(java.util.Locale.ROOT));
+                h.tvChipModalidad.setVisibility(View.VISIBLE);
+            } else {
+                h.tvChipModalidad.setVisibility(View.GONE);
+            }
+        }
+
         // Monto final
         h.monto.setText(money.format(total));
 
@@ -116,13 +130,14 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
     }
 
     static class VH extends RecyclerView.ViewHolder {
-        TextView titulo, detalle, tvBonoKm, monto;
+        TextView titulo, detalle, tvBonoKm, monto, tvChipModalidad;
         VH(@NonNull View v) {
             super(v);
             titulo   = v.findViewById(R.id.tvTitulo);
             detalle  = v.findViewById(R.id.tvDetalle);
             tvBonoKm = v.findViewById(R.id.tvBonoKm);
             monto    = v.findViewById(R.id.tvMonto);
+            tvChipModalidad = v.findViewById(R.id.tvChipModalidad);
         }
     }
 }

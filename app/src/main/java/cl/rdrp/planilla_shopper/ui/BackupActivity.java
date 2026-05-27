@@ -11,6 +11,7 @@ import java.util.List;
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
 import cl.rdrp.planilla_shopper.data.BonoExtra;
+import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 
 public class BackupActivity extends AppCompatActivity {
@@ -18,8 +19,14 @@ public class BackupActivity extends AppCompatActivity {
     private static final int REQ_EXPORT_BACKUP = 1001;
     private static final int REQ_IMPORT_BACKUP = 1002;
 
-    /** Version del formato JSON que escribimos al exportar (Fase 5). */
-    private static final int BACKUP_VERSION_CURRENT = 2;
+    /**
+     * Version del formato JSON que escribimos al exportar.
+     *
+     *   V1 (pre-Fase 5):  {registros, combustibles}
+     *   V2 (Fase 5):      + bonos
+     *   V3 (N4):          + cada registro lleva campo "modalidad"
+     */
+    private static final int BACKUP_VERSION_CURRENT = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +46,14 @@ public class BackupActivity extends AppCompatActivity {
     // Historial de versiones:
     //   V1 (pre-Fase 5): {registros, combustibles}, sin campo "version".
     //   V2 (Fase 5):     {version, registros, combustibles, bonos}.
+    //   V3 (N4):         igual a V2 pero cada registro tiene "modalidad".
     //
     // Al importar:
     //   - Si el JSON no trae "version" -> Gson deja en 0 -> tratamos como V1.
     //   - Si version >= 2 -> tratamos como V2 y restauramos bonos.
+    //   - Si version >= 3 -> los registros ya traen modalidad. Si es < 3,
+    //     los registros entrantes pueden tener modalidad == null y se les
+    //     asigna SHOPPER (decision N1: comportamiento original = Shopper).
     //   - Bonos NO se borran en restauracion de V1 (preservacion: el backup
     //     viejo no los conocia, no los podemos restaurar).
     public static class BackupData {
@@ -151,6 +162,18 @@ public class BackupActivity extends AppCompatActivity {
                 // Detectar version: si no viene el campo, Gson deja 0 -> V1.
                 final int version = (backup != null) ? backup.version : 0;
                 final boolean isV2OrMas = version >= 2;
+                final boolean isV3OrMas = version >= 3;
+
+                // Si el backup es pre-V3, los registros entrantes no traen
+                // campo "modalidad" -> Gson lo deja en null. Los marcamos
+                // como SHOPPER antes de insertar.
+                if (!isV3OrMas && backup != null && backup.registros != null) {
+                    for (Registro r : backup.registros) {
+                        if (r.modalidad == null || r.modalidad.isEmpty()) {
+                            r.modalidad = Modalidad.SHOPPER.name();
+                        }
+                    }
+                }
 
                 db.runInTransaction(() -> {
                     // Registros y combustibles: SIEMPRE delete + insert
@@ -176,9 +199,14 @@ public class BackupActivity extends AppCompatActivity {
                 });
 
                 runOnUiThread(() -> {
-                    String msg = isV2OrMas
-                            ? "Backup V2 importado completo (registros, combustibles y bonos)"
-                            : "Backup V1 importado — los bonos actuales se mantuvieron (no estaban en el backup)";
+                    String msg;
+                    if (isV3OrMas) {
+                        msg = "Backup V3 importado completo (registros con modalidad, combustibles y bonos)";
+                    } else if (isV2OrMas) {
+                        msg = "Backup V2 importado — registros viejos marcados como Shopper";
+                    } else {
+                        msg = "Backup V1 importado — registros marcados como Shopper. Los bonos actuales se mantuvieron";
+                    }
                     android.widget.Toast.makeText(this, msg, android.widget.Toast.LENGTH_LONG).show();
                 });
             } catch (Exception e) {

@@ -22,6 +22,25 @@ public class Registro {
     public int ventana;
     public int cant;
 
+    /**
+     * Modalidad de trabajo con la que se creó el registro (N4).
+     *
+     * Se guarda el name() del enum Modalidad (SHOPPER / PICKER / DRIVER).
+     * Los calculos del pedido (valor SKU, comision, fuel, bono km) usan los
+     * parametros configurados para esta modalidad, no la modalidad activa
+     * actual. Eso permite que cuando el usuario cambia su modalidad activa,
+     * los registros viejos sigan calculandose como cuando fueron creados.
+     *
+     * Migration 10->11: a todos los registros pre-N4 se les asigna 'SHOPPER'
+     * (decision tomada en N1: comportamiento original = Shopper).
+     *
+     * NOT NULL por seguridad: nunca debe quedar null. Si llega null por
+     * backup viejo, el codigo de lectura defiende usando
+     * Modalidad.fromName(null) -> SHOPPER.
+     */
+    @NonNull
+    public String modalidad = Modalidad.SHOPPER.name();
+
     public Registro( String fecha, String local, String sku, double km, long sg, int ventana, int cant) {
         this.fecha = fecha;
         this.local = local;
@@ -30,5 +49,8 @@ public class Registro {
         this.sg = sg;
         this.ventana = ventana;
         this.cant = cant;
+        // Por defecto SHOPPER. Quien cree el registro deberia setearlo
+        // explicitamente con la modalidad activa al momento de crear.
+        this.modalidad = Modalidad.SHOPPER.name();
     }
 }

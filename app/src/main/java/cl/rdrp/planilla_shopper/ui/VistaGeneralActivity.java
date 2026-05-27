@@ -28,6 +28,7 @@ import java.util.Map;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
+import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.util.Config;
 import cl.rdrp.planilla_shopper.util.Parsers;
@@ -151,14 +152,18 @@ public class VistaGeneralActivity extends AppCompatActivity {
 
             for (Registro r : regs) {
                 int skuQty = Parsers.parseIntOrZero(r.sku);
+
+                // N4: cada registro calcula con su propia modalidad
+                Modalidad m = Modalidad.fromName(r.modalidad);
+
                 int base   = basePorSku(skuQty);
-                int sSku   = skuQty * Config.getValorUnitSku();
+                int sSku   = skuQty * Config.getValorUnitSku(m);
                 long sKm   = Config.calcularTotalKm(r.km, r.fecha);
 
                 totalDiaPedidos += base + sSku + sKm;
 
-                // ✅ bono km domingo/lunes/martes
-                totalDiaBonoKm += calcularBonoKm(r.km, r.fecha);
+                // ✅ bono km domingo/lunes/martes — monto segun modalidad del registro
+                totalDiaBonoKm += calcularBonoKm(r.km, r.fecha, m);
             }
 
             // ✅ bonos manuales (tabla bonos) del día

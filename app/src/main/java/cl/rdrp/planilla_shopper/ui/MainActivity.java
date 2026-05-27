@@ -511,6 +511,10 @@ public class MainActivity extends AppCompatActivity {
         if (ventana < 0) { Toast.makeText(this, "Ventana no puede ser negativa", Toast.LENGTH_SHORT).show(); return; }
 
         Registro r = new Registro(fecha, local, sku, km, sg, ventana, cant);
+        // N4: estampar la modalidad activa al momento de crear. Asi el
+        // registro recuerda con que parametros fue creado, aunque despues
+        // el usuario cambie su modalidad activa.
+        r.modalidad = Prefs.getModalidad(this).name();
 
         AppDatabase.ioExecutor.execute(() -> {
             AppDatabase.get(this).registroDao().insertIgnore(r);
