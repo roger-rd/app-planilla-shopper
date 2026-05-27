@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- ===== Card editable (Fase 4c) ===== -->
+        <!-- ===== Card editable (Fase 4c + N3) ===== -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_editar_parametros"
             android:layout_width="match_parent"
@@ -24,11 +24,22 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:id="@+id/tvEditarParamsTitulo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Editar parámetros"
                     android:textStyle="bold"
                     android:textSize="16sp" />
+
+                <!-- Subtitulo dinamico: aclara que se esta editando la modalidad activa -->
+                <TextView
+                    android:id="@+id/tvModalidadHint"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    android:text="Parámetros de tu modalidad activa." />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -36,9 +47,10 @@
                     android:layout_marginTop="4dp"
                     android:textSize="12sp"
                     android:textStyle="italic"
-                    android:text="Estos cambios afectan los cálculos de todos los días (pasados y futuros). Los tramos por SKU, los valores de KM por fecha y las reglas de día de la semana NO son configurables." />
+                    android:text="Los tramos por SKU, los valores de KM por fecha y las reglas de día de la semana NO son configurables." />
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilValorSku"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
@@ -52,6 +64,7 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilComision"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -66,6 +79,7 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilRendimiento"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -79,6 +93,7 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilPrecioLitro"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
@@ -92,6 +107,7 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilBonoKm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"

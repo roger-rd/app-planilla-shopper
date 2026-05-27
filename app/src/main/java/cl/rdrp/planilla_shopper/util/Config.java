@@ -1,6 +1,7 @@
 package cl.rdrp.planilla_shopper.util;
 
 import cl.rdrp.planilla_shopper.App;
+import cl.rdrp.planilla_shopper.data.Modalidad;
 
 /**
  * Parametros de calculo y reglas de negocio.
@@ -10,6 +11,11 @@ import cl.rdrp.planilla_shopper.App;
  * SharedPreferences a traves de Prefs.* y se exponen aqui via metodos
  * getter estaticos. Los valores DEFAULT_* son los que se usan cuando el
  * usuario nunca toco la pantalla de parametros (comportamiento original).
+ *
+ * Desde N3, los 5 parametros viven POR MODALIDAD (Shopper / Picker / Driver):
+ *   - Los getters sin argumento usan la modalidad activa (Prefs.getModalidad).
+ *   - Los getters con (Modalidad m) leen una modalidad puntual (lo usa la
+ *     pantalla de parametros para mostrar/editar cada modalidad por separado).
  *
  * Lo que NO es configurable y permanece duro:
  *   - VALOR_UNIT_KM (constante referencial historica, no se usa en calculos)
@@ -35,26 +41,45 @@ public class Config {
     public static final int    DEFAULT_PRECIO_LITRO              = 1200;
     public static final double DEFAULT_BONO_POR_KM_DOM_LUN_MAR   = 100.0;
 
-    // ===== Getters de parametros configurables (Fase 4b) =====
+    // ===== Getters de parametros configurables (Fase 4b + N3) =====
+    //
+    // Sin args -> modalidad activa (uso normal desde los calculos).
+    // Con Modalidad m -> modalidad puntual (uso desde la pantalla de parametros
+    // que permite ver/editar las 3 modalidades aunque solo una este activa).
 
     public static int getValorUnitSku() {
         return Prefs.getValorUnitSku(App.get());
+    }
+    public static int getValorUnitSku(Modalidad m) {
+        return Prefs.getValorUnitSku(App.get(), m);
     }
 
     public static double getComisionPorc() {
         return Prefs.getComisionPorc(App.get());
     }
+    public static double getComisionPorc(Modalidad m) {
+        return Prefs.getComisionPorc(App.get(), m);
+    }
 
     public static double getRendimientoKmPorLitro() {
         return Prefs.getRendimientoKmPorLitro(App.get());
+    }
+    public static double getRendimientoKmPorLitro(Modalidad m) {
+        return Prefs.getRendimientoKmPorLitro(App.get(), m);
     }
 
     public static int getPrecioLitro() {
         return Prefs.getPrecioLitro(App.get());
     }
+    public static int getPrecioLitro(Modalidad m) {
+        return Prefs.getPrecioLitro(App.get(), m);
+    }
 
     public static double getBonoPorKmDomLunMar() {
         return Prefs.getBonoPorKmDomLunMar(App.get());
+    }
+    public static double getBonoPorKmDomLunMar(Modalidad m) {
+        return Prefs.getBonoPorKmDomLunMar(App.get(), m);
     }
 
     // ===== Reglas duras (no configurables) =====
