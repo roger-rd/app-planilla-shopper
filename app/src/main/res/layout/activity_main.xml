@@ -2,6 +2,7 @@
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -91,7 +92,9 @@
                                 android:inputType="none" />
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Local + Botón bono -->
+                        <!-- N5: badge sala activa + Boton bono.
+                             El campo Local se quito; ahora el local sale del
+                             local activo del usuario (cambiable via drawer). -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -99,24 +102,20 @@
                             android:gravity="center_vertical"
                             android:orientation="horizontal">
 
-                            <com.google.android.material.textfield.TextInputLayout
+                            <TextView
+                                android:id="@+id/tvSalaActiva"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:hint="Local"
-                                app:boxCornerRadiusBottomEnd="10dp"
-                                app:boxCornerRadiusBottomStart="10dp"
-                                app:boxCornerRadiusTopEnd="10dp"
-                                app:boxCornerRadiusTopStart="10dp"
-                                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etLocal"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:digits="0123456789"
-                                    android:inputType="number" />
-                            </com.google.android.material.textfield.TextInputLayout>
+                                android:background="@drawable/chip_modalidad_bg"
+                                android:paddingStart="12dp"
+                                android:paddingEnd="12dp"
+                                android:paddingTop="8dp"
+                                android:paddingBottom="8dp"
+                                android:textColor="@color/blue_onSecondaryContainer"
+                                android:textSize="13sp"
+                                android:textStyle="bold"
+                                tools:text="Sala: 16234 — Las Condes" />
 
                             <com.google.android.material.button.MaterialButton
                                 android:id="@+id/btnAgregarBono"

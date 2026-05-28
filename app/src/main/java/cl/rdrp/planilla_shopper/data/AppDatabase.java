@@ -16,9 +16,10 @@ import java.util.concurrent.Executors;
         entities = {
                 Registro.class,
                 Combustible.class,
-                BonoExtra.class
+                BonoExtra.class,
+                Local.class             // N5: catalogo de locales
         },
-        version = 11,               // N4: agrega columna modalidad a registro
+        version = 12,               // N5: agrega tabla locales con auto-import
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -39,7 +40,8 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract RegistroDao registroDao();
     public abstract CombustibleDao combustibleDao();
-    public abstract BonoDao bonoDao();          // 👈 NUEVO
+    public abstract BonoDao bonoDao();
+    public abstract LocalDao localDao();        // N5
 
     // 6 → 7
     static final Migration MIGRATION_6_7 = new Migration(6, 7) {
@@ -110,6 +112,43 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    // 11 → 12  👉 N5: tabla locales (catalogo) + auto-import de codigos
+    // distintos que ya existian en registro. Asi el usuario no tiene que
+    // recrear su catalogo a mano al actualizar.
+    //
+    // Notas:
+    //  - "activo" se guarda como INTEGER NOT NULL DEFAULT 1 (true) porque
+    //    SQLite no tiene tipo boolean. Room lo lee como boolean igualmente.
+    //  - El UNIQUE INDEX en "codigo" garantiza que el auto-import no
+    //    duplique codigos si DISTINCT ya los normalizo, pero ademas previene
+    //    duplicados creados manualmente desde la UI.
+    static final Migration MIGRATION_11_12 = new Migration(11, 12) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS locales (" +
+                            "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "codigo TEXT NOT NULL, " +
+                            "alias TEXT, " +
+                            "activo INTEGER NOT NULL DEFAULT 1" +
+                            ")"
+            );
+            db.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS index_locales_codigo " +
+                            "ON locales (codigo)"
+            );
+            // Auto-import: poblar locales con los codigos distintos que ya
+            // hay en registro. INSERT OR IGNORE para que no falle si por
+            // alguna razon la tabla locales ya tuviera filas (no deberia
+            // pasar en una migration 11->12, pero defensivo).
+            db.execSQL(
+                    "INSERT OR IGNORE INTO locales (codigo, alias, activo) " +
+                            "SELECT DISTINCT local, NULL, 1 FROM registro " +
+                            "WHERE local IS NOT NULL AND TRIM(local) != ''"
+            );
+        }
+    };
+
     public static AppDatabase get(Context ctx) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
@@ -124,7 +163,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     MIGRATION_7_8,
                                     MIGRATION_8_9,
                                     MIGRATION_9_10,
-                                    MIGRATION_10_11   // N4
+                                    MIGRATION_10_11,  // N4
+                                    MIGRATION_11_12   // N5
                             )
                             .build();
                 }

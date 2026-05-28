@@ -23,6 +23,16 @@
             android:icon="@android:drawable/ic_menu_preferences" />
 
         <item
+            android:id="@+id/nav_sala"
+            android:title="Sala de trabajo"
+            android:icon="@android:drawable/ic_menu_mylocation" />
+
+        <item
+            android:id="@+id/nav_locales"
+            android:title="Gestionar salas/locales"
+            android:icon="@android:drawable/ic_menu_sort_by_size" />
+
+        <item
             android:id="@+id/nav_bencina"
             android:title="Registro de bencina"
             android:icon="@android:drawable/ic_menu_compass" />

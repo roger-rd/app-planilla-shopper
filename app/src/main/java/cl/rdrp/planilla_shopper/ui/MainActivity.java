@@ -2,6 +2,7 @@ package cl.rdrp.planilla_shopper.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -99,6 +100,17 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(this, ParametrosCalculosActivity.class));
             } else if (id == R.id.nav_modalidad) {
                 mostrarDialogoCambiarModalidad();
+            } else if (id == R.id.nav_sala) {
+                // N5: cambiar la sala/local activo. Usa el mismo popup que la
+                // bienvenida pero cancelable, y no encadena al de modalidad.
+                LocalPickerDialog.mostrar(this, "Sala de trabajo", true, l -> {
+                    Toast.makeText(this,
+                            "Sala activa: " + l.display(),
+                            Toast.LENGTH_SHORT).show();
+                });
+            } else if (id == R.id.nav_locales) {
+                // N5: pantalla CRUD del catalogo de salas.
+                startActivity(new Intent(this, LocalesActivity.class));
             } else if (id == R.id.nav_backup) {
                 startActivity(new Intent(this, BackupActivity.class));
             }else if (id == R.id.nav_bencina) {
@@ -119,8 +131,8 @@ public class MainActivity extends AppCompatActivity {
         vb.etSg.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789,."));
         vb.etVentana.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789,."));
 
-        // cargar local guardado si existe
-        String saveLocal = cl.rdrp.planilla_shopper.util.Prefs.getLocal(this);
+        // N5: el campo Local ya no esta en el form. r.local sale de
+        // Prefs.getLocalActivo (seteado via popup de bienvenida o drawer).
 
         vb.btnGuardar.setOnClickListener(v -> guardar());
         vb.btnLimpiar.setOnClickListener(v -> limpiar());
@@ -179,13 +191,77 @@ public class MainActivity extends AppCompatActivity {
         // Botón "Agregar bono"
                 vb.btnAgregarBono.setOnClickListener(v -> mostrarDialogoBono());
 
-        // Popup de bienvenida si nunca eligio modalidad (N1)
-        if (!Prefs.hasModalidad(this)) {
-            mostrarPopupBienvenidaModalidad();
-        }
+        // Popups de bienvenida encadenados (N5 + N1):
+        //   1ro: local activo (si no tiene)
+        //   2do: modalidad (si no tiene)
+        // Se encadenan para que no aparezcan al mismo tiempo. Si el usuario
+        // ya tiene ambos seteados, no se muestra nada.
+        mostrarPopupsBienvenidaEncadenados();
 
         // Aplicar visibilidad de campos segun modalidad (N2)
         aplicarVisibilidadPorModalidad();
+
+        // N5: refrescar el badge de sala activa
+        actualizarBadgeSalaActiva();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // N5: si el usuario cambio de sala desde el drawer o desde Locales,
+        // refrescar el badge al volver a Main.
+        actualizarBadgeSalaActiva();
+    }
+
+    /**
+     * Pinta el badge "Sala: {codigo} — {alias}" segun el local activo. Si
+     * existe alias en el catalogo, se muestra. Si no, solo el codigo.
+     * Si no hay local activo (caso borde, no deberia pasar despues del
+     * popup de bienvenida), muestra "Sala: no seleccionada".
+     */
+    private void actualizarBadgeSalaActiva() {
+        TextView tvSala = findViewById(R.id.tvSalaActiva);
+        if (tvSala == null) return;
+
+        String codigo = Prefs.getLocalActivo(this);
+        if (codigo == null || codigo.isEmpty()) {
+            tvSala.setText("Sala: no seleccionada");
+            return;
+        }
+
+        // Buscar el alias en el catalogo, async para no bloquear el UI thread.
+        AppDatabase.ioExecutor.execute(() -> {
+            cl.rdrp.planilla_shopper.data.Local l =
+                    AppDatabase.get(this).localDao().findByCodigo(codigo);
+            String display = (l != null) ? l.display() : codigo;
+            runOnUiThread(() -> tvSala.setText("Sala: " + display));
+        });
+    }
+
+    /**
+     * Encadena los popups de bienvenida (local primero, modalidad despues).
+     * Decisiones N5:
+     *   - Si no hay local activo, mostrar popup local (no cancelable).
+     *     Al elegir, si tampoco hay modalidad, mostrar el de modalidad.
+     *   - Si ya hay local pero no hay modalidad, mostrar solo el de modalidad.
+     *   - Si ya hay ambos, no mostrar nada.
+     */
+    private void mostrarPopupsBienvenidaEncadenados() {
+        if (!Prefs.hasLocalActivo(this)) {
+            LocalPickerDialog.mostrar(this,
+                    "¡Bienvenido! Indicá tu sala",
+                    false,
+                    elegido -> {
+                        Toast.makeText(this,
+                                "Sala activa: " + elegido.display(),
+                                Toast.LENGTH_SHORT).show();
+                        if (!Prefs.hasModalidad(this)) {
+                            mostrarPopupBienvenidaModalidad();
+                        }
+                    });
+        } else if (!Prefs.hasModalidad(this)) {
+            mostrarPopupBienvenidaModalidad();
+        }
     }
 
     /**
@@ -459,12 +535,22 @@ public class MainActivity extends AppCompatActivity {
 
     private void guardar() {
         String fecha    = Texts.s(vb.etFecha.getText()); // ahora guarda yyyy-MM-dd
-        String local    = Texts.s(vb.etLocal.getText());
+        // N5: el local sale del local activo (Prefs), no del form. Si no
+        // hay local activo, abrir el popup de seleccion en vez de guardar.
+        String local    = Prefs.getLocalActivo(this);
         String sku      = Texts.s(vb.etSku.getText());
         String kmS      = Texts.s(vb.etKm.getText());
         String sgS      = Texts.s(vb.etSg.getText());
         String ventanaS = Texts.s(vb.etVentana.getText());
         String cantS    = Texts.s(vb.etCant.getText());
+
+        if (local.isEmpty()) {
+            Toast.makeText(this,
+                    "Primero indicá tu sala desde el menú lateral",
+                    Toast.LENGTH_LONG).show();
+            LocalPickerDialog.mostrar(this, "Sala de trabajo", true, l -> {});
+            return;
+        }
 
         // N2: si la modalidad oculta un campo, asignar default para que el
         // resto del flujo (validacion y guardado) trate al campo como si
@@ -477,13 +563,8 @@ public class MainActivity extends AppCompatActivity {
             sku = "0";  // Driver no usa SKU
         }
 
-        // Guarda LOCAL predeterminado si no existe
-        if (!Prefs.hasLocal(this)) {
-            Prefs.setLocal(this, local);
-        }
-
-        // Campos obligatorios
-        if (fecha.isEmpty() || local.isEmpty() || sku.isEmpty() || kmS.isEmpty() || sgS.isEmpty() || ventanaS.isEmpty() || cantS.isEmpty()) {
+        // Campos obligatorios (el local ya esta validado arriba)
+        if (fecha.isEmpty() || sku.isEmpty() || kmS.isEmpty() || sgS.isEmpty() || ventanaS.isEmpty() || cantS.isEmpty()) {
             Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }

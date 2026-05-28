@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:maxHeight="500dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@+id/tvDialogLocalIntro"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/blue_onSurface"
+            android:alpha="0.85"
+            android:layout_marginBottom="12dp"
+            android:text="Cada sala tiene sus propias promociones. Indícanos en cuál estás trabajando hoy." />
+
+        <!-- Contenedor dinamico: la Activity infla aqui una card-boton por
+             cada local activo del catalogo. -->
+        <LinearLayout
+            android:id="@+id/contenedorLocales"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <!-- Estado vacio: se muestra si el catalogo no tiene ningun local. -->
+        <LinearLayout
+            android:id="@+id/contenedorVacio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="@color/blue_onSurface"
+                android:alpha="0.75"
+                android:text="Todavía no tenés salas guardadas. Tocá el botón para crear la primera." />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnIrACrearLocal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Crear primera sala" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

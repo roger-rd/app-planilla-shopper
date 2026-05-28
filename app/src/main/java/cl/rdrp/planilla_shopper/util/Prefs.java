@@ -74,7 +74,21 @@ public class Prefs {
         return "param_" + m.name() + "_" + sufijo;
     }
 
-    // ===== Local default (legacy) =====
+    // ===== Local activo (N5; antes "local default") =====
+    //
+    // Desde N5, este valor representa el LOCAL ACTIVO del usuario: la sala
+    // donde esta trabajando hoy. Funciona igual que la modalidad activa:
+    // se setea con un popup de bienvenida en el primer arranque, y se
+    // puede cambiar despues desde el item del drawer.
+    //
+    // La key fisica sigue siendo "local_default" para preservar el valor
+    // que los usuarios ya pueden tener guardado pre-N5 (en ese caso, el
+    // local que ya se uso como default pasa a ser el local activo
+    // automaticamente, sin necesidad de re-elegirlo).
+    //
+    // Los metodos getLocal/setLocal/hasLocal se mantienen como alias
+    // legacy. Codigo nuevo deberia preferir getLocalActivo / setLocalActivo
+    // / hasLocalActivo para que la intencion quede explicita.
 
     public static void setLocal(Context c, String local) {
         prefs(c).edit().putString(K_LOCAL, local).apply();
@@ -84,6 +98,19 @@ public class Prefs {
     }
     public static boolean hasLocal(Context c) {
         return !getLocal(c).isEmpty();
+    }
+
+    /** Alias semantico de setLocal: el local que el usuario esta usando ahora. */
+    public static void setLocalActivo(Context c, String codigo) {
+        setLocal(c, codigo);
+    }
+    /** Codigo del local activo, o "" si nunca eligio. */
+    public static String getLocalActivo(Context c) {
+        return getLocal(c);
+    }
+    /** True si el usuario ya eligio un local activo (= no es el primer arranque). */
+    public static boolean hasLocalActivo(Context c) {
+        return hasLocal(c);
     }
 
     // ===== Parametros de calculo por modalidad (N3) =====
