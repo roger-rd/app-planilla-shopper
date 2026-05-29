@@ -97,24 +97,62 @@ public class Config {
     }
 
 
-    // Calcula el bono en pesos usando el bono/km de la modalidad ACTIVA.
-    // Atajo para codigo legacy. Para usos per-registro, preferir el overload
-    // con (Modalidad m) y pasar la modalidad del registro.
+    // ===== calcularBonoKm — overloads =====
+    //
+    // El calculo del bono por km depende de:
+    //   - KM del registro (debe ser > 0)
+    //   - Fecha (regla actual: lun/mar; dom adicionalmente si fecha < 2026-03-01)
+    //   - Modalidad (monto por km configurado per-modalidad en Prefs)
+    //   - Sala (N5.5: gating por BonoKmPolicy; hoy solo sala 139 habilita)
+    //
+    // La firma "canonica" es la de 4 argumentos: calcularBonoKm(km, fecha,
+    // modalidad, sala). Los overloads viejos quedan @Deprecated y delegan
+    // a la canonica pasando sala=null, lo que hace que la policy retorne
+    // false y por tanto el bono sea 0. Esto es defensivo: si algun codigo
+    // viejo llama al overload sin sala, obtiene 0 en lugar de un calculo
+    // que ignoraba la regla de sala.
+
+    /**
+     * @deprecated desde N5.5 usar calcularBonoKm(km, fecha, modalidad, sala).
+     * Mantenido por compat; ahora siempre retorna 0 porque sin sala no se
+     * puede aplicar la policy.
+     */
+    @Deprecated
     public static Double calcularBonoKm(double km, String fechaIso) {
-        return calcularBonoKm(km, fechaIso, Prefs.getModalidad(App.get()));
+        return calcularBonoKm(km, fechaIso, Prefs.getModalidad(App.get()), null);
     }
 
     /**
-     * Calcula el bono por km usando el valor configurado para la modalidad
-     * indicada. Las reglas de fecha (dom/lun/mar pre-2026-03-01, lun/mar
-     * post) NO dependen de la modalidad: son reglas de negocio fijas.
-     *
-     * Lo unico que cambia entre modalidades es el monto por km (Prefs
-     * "param_{MODALIDAD}_bono_km_dom_lun_mar").
+     * @deprecated desde N5.5 usar calcularBonoKm(km, fecha, modalidad, sala).
+     * Mantenido por compat; ahora siempre retorna 0 porque sin sala no se
+     * puede aplicar la policy. Los consumidores deben pasar r.local.
      */
+    @Deprecated
     public static Double calcularBonoKm(double km, String fechaIso, Modalidad modalidad) {
+        return calcularBonoKm(km, fechaIso, modalidad, null);
+    }
+
+    /**
+     * Calcula el bono por km del registro.
+     *
+     * Reglas (de mas restrictivas a menos):
+     *   1. KM > 0 y fecha no vacia (sino 0).
+     *   2. La combinacion (sala, modalidad) habilita bono via BonoKmPolicy.
+     *      Hoy: solo sala "139" habilita; en N6 sera configurable.
+     *   3. El dia de la semana es lun/mar; o domingo si la fecha es anterior
+     *      al 2026-03-01 (fecha de corte historica fija).
+     *   4. Monto = km * getBonoPorKmDomLunMar(modalidad). Cada modalidad
+     *      tiene su monto configurable; Picker default 0 -> no recibe.
+     */
+    public static Double calcularBonoKm(double km, String fechaIso,
+                                        Modalidad modalidad, String sala) {
         if (km <= 0) return 0.0;
         if (fechaIso == null || fechaIso.trim().isEmpty()) return 0.0;
+
+        // N5.5: gating por sala+modalidad. Si la policy dice que no aplica,
+        // no se evalua el resto. Esto deja arquitectura lista para N6 sin
+        // tocar a los consumidores.
+        if (!BonoKmPolicy.aplica(sala, modalidad)) return 0.0;
 
         try {
             java.text.SimpleDateFormat sdf =

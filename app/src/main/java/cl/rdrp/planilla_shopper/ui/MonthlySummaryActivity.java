@@ -110,7 +110,8 @@ public class MonthlySummaryActivity extends AppCompatActivity {
                 int base = basePorSku(skuQty);
                 int sSku = skuQty * Config.getValorUnitSku(m);
                 long sKm = Config.calcularTotalKm(r.km, r.fecha); // modif cuando pase contingencia
-                double bonoKmReg = calcularBonoKm(r.km, r.fecha, m);
+                // N5.5: sala del registro determina si aplica bono (hoy solo "139").
+                double bonoKmReg = calcularBonoKm(r.km, r.fecha, m, r.local);
                 bonoKm$ += bonoKmReg;
 
                 long subtotalReg = base + sSku + sKm;

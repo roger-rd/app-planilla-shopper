@@ -163,7 +163,8 @@ public class VistaGeneralActivity extends AppCompatActivity {
                 totalDiaPedidos += base + sSku + sKm;
 
                 // ✅ bono km domingo/lunes/martes — monto segun modalidad del registro
-                totalDiaBonoKm += calcularBonoKm(r.km, r.fecha, m);
+                // N5.5: sala del registro determina si aplica (hoy solo "139").
+                totalDiaBonoKm += calcularBonoKm(r.km, r.fecha, m, r.local);
             }
 
             // ✅ bonos manuales (tabla bonos) del día

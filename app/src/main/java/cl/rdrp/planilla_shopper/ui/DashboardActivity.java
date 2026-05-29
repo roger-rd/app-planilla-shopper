@@ -122,8 +122,9 @@ public class DashboardActivity extends AppCompatActivity {
                 int  sSku   = skuQty * Config.getValorUnitSku(m);
                 long sKm    = Config.calcularTotalKm(r.km, r.fecha); //modif cuando pase contingencia
 
-                // bono km según fecha (solo domingo, lunes, martes), monto segun modalidad
-                double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m);
+                // bono km según fecha (solo domingo, lunes, martes), monto segun modalidad.
+                // N5.5: ademas la sala del registro debe estar habilitada (hoy solo "139").
+                double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m, r.local);
                 double total = (long) base + sSku + sKm + bonoKm; // mismo total que en las cards
 
                 totalDia     += total;

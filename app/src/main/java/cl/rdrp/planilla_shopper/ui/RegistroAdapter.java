@@ -71,8 +71,9 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
         int sSku   = skuQty * Config.getValorUnitSku(m);
         long sKm   = Config.calcularTotalKm(r.km, r.fecha); // KM con decimales → pesos // modif cuando pase contingencia
 
-        // 💰 bono por km según fecha, usando bono de la modalidad del registro
-        double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m);
+        // 💰 bono por km según fecha, usando bono de la modalidad del registro.
+        // N5.5: ademas la sala del registro debe estar habilitada (hoy solo "139").
+        double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m, r.local);
 
         // total ya incluye el bono
         double total = (long) base + sSku + sKm + bonoKm;
