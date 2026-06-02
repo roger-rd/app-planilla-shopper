@@ -1,6 +1,5 @@
 package cl.rdrp.planilla_shopper.ui;
 
-import static cl.rdrp.planilla_shopper.util.Config.basePorSku;
 import static cl.rdrp.planilla_shopper.util.Config.calcularBonoKm;
 
 
@@ -107,7 +106,8 @@ public class MonthlySummaryActivity extends AppCompatActivity {
                 // Modalidad del registro
                 Modalidad m = Modalidad.fromName(r.modalidad);
 
-                int base = basePorSku(skuQty);
+                // Tramos editables: version vigente para esta modalidad y fecha
+                int base = Config.basePorSku(skuQty, m, r.fecha);
                 int sSku = skuQty * Config.getValorUnitSku(m);
                 long sKm = Config.calcularTotalKm(r.km, r.fecha); // modif cuando pase contingencia
                 // N5.5: sala del registro determina si aplica bono (hoy solo "139").

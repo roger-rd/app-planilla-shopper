@@ -3,6 +3,8 @@ package cl.rdrp.planilla_shopper;
 import android.app.Application;
 import android.content.Context;
 
+import cl.rdrp.planilla_shopper.util.TramosResolver;
+
 /**
  * Application class de la app.
  *
@@ -27,6 +29,12 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         appContext = getApplicationContext();
+
+        // Warmup del cache de tramos editables. Async, no bloquea el boot.
+        // Si la primera Activity arranca antes de que termine, los
+        // adapters caen al fallback hardcoded (= seed inicial), lo cual
+        // produce los mismos numeros que si el cache estuviera listo.
+        TramosResolver.warmupAsync();
     }
 
     /**

@@ -1,7 +1,5 @@
 package cl.rdrp.planilla_shopper.ui;
 
-import static cl.rdrp.planilla_shopper.util.Config.basePorSku;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,8 +64,8 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
         // N4: parametros segun la modalidad del registro (no la activa)
         Modalidad m = Modalidad.fromName(r.modalidad);
 
-        // Cálculos por fila
-        int base   = basePorSku(skuQty);
+        // Cálculos por fila — tramos editables segun modalidad+fecha del registro
+        int base   = Config.basePorSku(skuQty, m, r.fecha);
         int sSku   = skuQty * Config.getValorUnitSku(m);
         long sKm   = Config.calcularTotalKm(r.km, r.fecha); // KM con decimales → pesos // modif cuando pase contingencia
 

@@ -44,6 +44,10 @@
         <activity
             android:name=".ui.LocalesActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".ui.TramosActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

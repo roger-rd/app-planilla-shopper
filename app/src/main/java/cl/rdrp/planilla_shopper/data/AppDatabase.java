@@ -17,9 +17,10 @@ import java.util.concurrent.Executors;
                 Registro.class,
                 Combustible.class,
                 BonoExtra.class,
-                Local.class             // N5: catalogo de locales
+                Local.class,            // N5: catalogo de locales
+                TramosVersion.class     // Tramos editables: snapshots por modalidad
         },
-        version = 12,               // N5: agrega tabla locales con auto-import
+        version = 13,               // Tramos editables con versionado por fecha
         exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -42,6 +43,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract CombustibleDao combustibleDao();
     public abstract BonoDao bonoDao();
     public abstract LocalDao localDao();        // N5
+    public abstract TramosVersionDao tramosDao(); // Tramos editables
 
     // 6 → 7
     static final Migration MIGRATION_6_7 = new Migration(6, 7) {
@@ -112,6 +114,54 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    // 12 → 13  👉 Tramos editables: tabla snapshots por modalidad + seed
+    // con los valores hardcoded actuales desde fecha "2025-01-01" (epoca
+    // aproximada de inicio de uso real de la app, mas representativa que
+    // 1970). El seed garantiza que cualquier registro post-2025-01-01 cae
+    // dentro de la version inicial y obtiene exactamente los mismos
+    // numeros que daba el hardcode anterior.
+    //
+    // Si por algun motivo hay registros pre-2025-01-01, getVigenteEn no
+    // encontrara version y el resolver cae al fallback hardcoded que es
+    // identico al seed, por lo que tampoco rompe nada.
+    static final Migration MIGRATION_12_13 = new Migration(12, 13) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS tramos_versions (" +
+                            "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "modalidad TEXT NOT NULL, " +
+                            "fecha_desde TEXT NOT NULL, " +
+                            "t1 INTEGER NOT NULL, " +
+                            "t2 INTEGER NOT NULL, " +
+                            "t3 INTEGER NOT NULL, " +
+                            "t4 INTEGER NOT NULL, " +
+                            "t5 INTEGER NOT NULL, " +
+                            "t6 INTEGER NOT NULL, " +
+                            "t7 INTEGER NOT NULL, " +
+                            "t8 INTEGER NOT NULL" +
+                            ")"
+            );
+            db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_tramos_versions_modalidad_fecha_desde " +
+                            "ON tramos_versions (modalidad, fecha_desde)"
+            );
+            // Seed: una version inicial por modalidad con valores actuales
+            // desde fecha "vieja" para cubrir cualquier registro historico.
+            // Los 8 valores deben coincidir EXACTAMENTE con los del
+            // Config.basePorSku() hardcoded pre-feature para garantizar
+            // que ningun calculo cambie post-migracion.
+            for (String mod : new String[]{"SHOPPER", "PICKER", "DRIVER"}) {
+                db.execSQL(
+                        "INSERT INTO tramos_versions " +
+                                "(modalidad, fecha_desde, t1, t2, t3, t4, t5, t6, t7, t8) " +
+                                "VALUES ('" + mod + "', '2025-01-01', " +
+                                "2623, 3026, 4035, 5044, 7061, 8070, 9079, 10088)"
+                );
+            }
+        }
+    };
+
     // 11 → 12  👉 N5: tabla locales (catalogo) + auto-import de codigos
     // distintos que ya existian en registro. Asi el usuario no tiene que
     // recrear su catalogo a mano al actualizar.
@@ -164,7 +214,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     MIGRATION_8_9,
                                     MIGRATION_9_10,
                                     MIGRATION_10_11,  // N4
-                                    MIGRATION_11_12   // N5
+                                    MIGRATION_11_12,  // N5
+                                    MIGRATION_12_13   // Tramos editables
                             )
                             .build();
                 }

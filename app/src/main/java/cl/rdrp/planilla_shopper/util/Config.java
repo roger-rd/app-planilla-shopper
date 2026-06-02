@@ -31,6 +31,26 @@ public class Config {
     // Constante referencial historica (no se usa en calculos)
     public static final double VALOR_UNIT_KM = 234.0;
 
+    // ===== Tramos por SKU =====
+    //
+    // Los LIMITES son fijos (decision: la cantidad de tramos no cambia).
+    // Solo los VALORES asociados a cada tramo son editables y versionados
+    // por modalidad+fecha en la tabla tramos_versions. Estas constantes:
+    //
+    //   - TRAMOS_LIMITES: limite superior INCLUSIVO de cada tramo (1..7).
+    //     skuQty > el ultimo limite cae en el tramo 8 ("mas de 150").
+    //   - TRAMOS_VALORES_HISTORICOS: valores hardcoded pre-feature. Se
+    //     usan SOLO como fallback defensivo si no hay version vigente en
+    //     DB para la modalidad consultada (no deberia pasar despues del
+    //     seed de la migration 12->13).
+    //
+    // Si en el futuro se quiere cambiar la CANTIDAD de tramos, este array
+    // y los campos t1..t8 de TramosVersion tendrian que evolucionar juntos
+    // (probablemente con una migration adicional).
+    public static final int[] TRAMOS_LIMITES = {10, 30, 50, 70, 90, 125, 150};
+    public static final int[] TRAMOS_VALORES_HISTORICOS =
+            {2623, 3026, 4035, 5044, 7061, 8070, 9079, 10088};
+
     // ===== Defaults para SharedPreferences (Fase 4a) =====
     // Si Prefs no tiene valor, los getters de abajo retornan estos defaults.
     // El comportamiento de la app es identico al original mientras el
@@ -84,16 +104,40 @@ public class Config {
 
     // ===== Reglas duras (no configurables) =====
 
+    // ===== basePorSku — overloads =====
+    //
+    // La firma canonica es basePorSku(skuQty, modalidad, fechaIso): consulta
+    // la version vigente de tramos para esa modalidad y fecha via
+    // TramosResolver. Esto reemplaza el viejo hardcode con valores
+    // editables y versionados.
+    //
+    // El overload sin args queda @Deprecated y mantiene los valores
+    // HARDCODED historicos para compat defensiva: si algun consumidor
+    // quedo sin migrar, no rompe — sigue devolviendo los mismos numeros
+    // que daba antes. Pero pierde el versionado y la edicion.
+
+    /**
+     * @deprecated usar basePorSku(skuQty, modalidad, fechaIso) para que
+     * el calculo respete los tramos editables y el versionado por fecha.
+     * Este overload retorna los valores hardcoded historicos.
+     */
+    @Deprecated
     public static int basePorSku(int skuQty) {
         if (skuQty <= 0) return 0;
-        if (skuQty <= 10) return 2623;
-        if (skuQty <= 30) return 3026;
-        if (skuQty <= 50) return 4035;
-        if (skuQty <= 70) return 5044;
-        if (skuQty <= 90) return 7061;
-        if (skuQty <= 125) return 8070;
-        if (skuQty <= 150) return 9079;
-        return 10088;
+        int[] valores = TRAMOS_VALORES_HISTORICOS;
+        int[] limites = TRAMOS_LIMITES;
+        for (int i = 0; i < limites.length; i++) {
+            if (skuQty <= limites[i]) return valores[i];
+        }
+        return valores[valores.length - 1];
+    }
+
+    /**
+     * Valor base por SKU usando la version vigente para esa modalidad y
+     * fecha. Delega en TramosResolver que maneja el cache en memoria.
+     */
+    public static int basePorSku(int skuQty, Modalidad modalidad, String fechaIso) {
+        return TramosResolver.getValor(skuQty, modalidad, fechaIso);
     }
 
 

@@ -98,6 +98,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else if (id == R.id.nav_calculo) {
                 startActivity(new Intent(this, ParametrosCalculosActivity.class));
+            } else if (id == R.id.nav_tramos) {
+                startActivity(new Intent(this, TramosActivity.class));
             } else if (id == R.id.nav_modalidad) {
                 mostrarDialogoCambiarModalidad();
             } else if (id == R.id.nav_sala) {

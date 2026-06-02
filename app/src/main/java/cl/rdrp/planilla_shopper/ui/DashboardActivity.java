@@ -1,7 +1,5 @@
 package cl.rdrp.planilla_shopper.ui;
 
-import static cl.rdrp.planilla_shopper.util.Config.basePorSku;   // 👈 usamos SIEMPRE el del Config
-
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 
@@ -118,7 +116,8 @@ public class DashboardActivity extends AppCompatActivity {
                 // Modalidad del registro
                 Modalidad m = Modalidad.fromName(r.modalidad);
 
-                int  base   = basePorSku(skuQty);
+                // Tramos editables: usa la version vigente para esta modalidad y fecha
+                int  base   = Config.basePorSku(skuQty, m, r.fecha);
                 int  sSku   = skuQty * Config.getValorUnitSku(m);
                 long sKm    = Config.calcularTotalKm(r.km, r.fecha); //modif cuando pase contingencia
 

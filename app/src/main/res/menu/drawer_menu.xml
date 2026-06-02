@@ -18,6 +18,11 @@
             android:icon="@android:drawable/ic_menu_view" />
 
         <item
+            android:id="@+id/nav_tramos"
+            android:title="Tramos por SKU"
+            android:icon="@android:drawable/ic_menu_sort_alphabetically" />
+
+        <item
             android:id="@+id/nav_modalidad"
             android:title="Modalidad de trabajo"
             android:icon="@android:drawable/ic_menu_preferences" />
