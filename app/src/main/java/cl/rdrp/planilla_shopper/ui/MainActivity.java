@@ -113,6 +113,8 @@ public class MainActivity extends AppCompatActivity {
             } else if (id == R.id.nav_locales) {
                 // N5: pantalla CRUD del catalogo de salas.
                 startActivity(new Intent(this, LocalesActivity.class));
+            } else if (id == R.id.nav_qr_pesable) {
+                startActivity(new Intent(this, QrPesableActivity.class));
             } else if (id == R.id.nav_backup) {
                 startActivity(new Intent(this, BackupActivity.class));
             }else if (id == R.id.nav_bencina) {

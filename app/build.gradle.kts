@@ -60,6 +60,13 @@ dependencies {
     // Gráficos
     implementation(libs.mpandroidchart)
 
+    // QR Pesable: generar y escanear codigos QR.
+    // - zxing-android-embedded incluye Activity de scan + helpers (BarcodeEncoder).
+    // - zxing-core es el motor de codificacion/decodificacion (transitivo del
+    //   anterior, pero lo declaramos explicito por claridad).
+    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+    implementation("com.google.zxing:core:3.5.2")
+
     // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)

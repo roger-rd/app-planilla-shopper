@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- QR Pesable: necesario para el scanner de ZXing. Permiso runtime,
+         pedido on-demand desde QrPesableActivity (no en el primer arranque). -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -47,6 +54,10 @@
 
         <activity
             android:name=".ui.TramosActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.QrPesableActivity"
             android:exported="false" />
     </application>
 

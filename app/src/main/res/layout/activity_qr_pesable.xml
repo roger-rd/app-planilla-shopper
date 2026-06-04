@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/blue_background"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- ===== Card de entrada ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/blue_surface"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/blue_primaryContainer"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Generador de QR Pesable"
+                    android:textStyle="bold"
+                    android:textColor="@color/blue_onSurface"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="¿El QR del ticket es muy pequeño o difícil de leer? Seguí estos pasos:"
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    android:textColor="@color/blue_onSurface"
+                    android:alpha="0.75" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    app:cardBackgroundColor="@color/blue_surface"
+                    app:cardCornerRadius="10dp"
+                    app:strokeColor="@color/blue_secondary"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ℹ️ Instrucciones"
+                            android:textStyle="bold"
+                            android:textColor="@color/blue_secondary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Si no lográs leer el QR del ticket de peso:"
+                            android:textColor="@color/blue_onSurface"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="1. Tocá Escanear QR \n\n2. Escaneá el QR del ticket. \n\n3 Si falla buscá en tu teléfono la opción de escanear código QR.\n\n3. Escaneá el QR del ticket.\n\n4. Copiá el texto obtenido. Debe comenzar con PESABLE;.\n\n5. Pegalo en el campo 'Texto PESABLE'.\n\n6. Presioná 'Generar QR' para obtener una versión más grande y fácil de leer."
+                            android:textColor="@color/blue_onSurface"
+                            android:textSize="12sp"
+                            android:alpha="0.85" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilTexto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Texto PESABLE"
+                    app:helperText="">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etTexto"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textNoSuggestions"
+                        android:maxLines="3"
+                        tools:text="PESABLE;260530110732;210154001550;10154;1550;1;260530;17990" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="12dp">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnEscanear"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Escanear QR"
+                        app:strokeColor="@color/blue_secondary"
+                        app:strokeWidth="1.5dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGenerar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="Generar QR" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ===== Card de QR generado ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardQr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/blue_surface"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/blue_primaryContainer"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="QR generado"
+                    android:textStyle="bold"
+                    android:textColor="@color/blue_onSurface"
+                    android:textSize="14sp" />
+
+                <!-- ImageView con fondo blanco para garantizar contraste del QR
+                     incluso en dark mode. -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="#FFFFFF"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:id="@+id/ivQr"
+                        android:layout_width="match_parent"
+                        android:layout_height="320dp"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="Código QR generado" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvInfoParsed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:textColor="@color/blue_onSurface"
+                    android:textSize="13sp"
+                    android:lineSpacingExtra="2dp"
+                    tools:text="Producto: 10154\nPeso: 1.550 kg\nPrecio: $17.990\nCódigo de barras: 210154001550" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnLimpiar"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="8dp"
+                    android:text="Limpiar" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- ===== Card de codigo de barras (independiente del QR) ===== -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/blue_surface"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/blue_primaryContainer"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Código de barras"
+                    android:textStyle="bold"
+                    android:textColor="@color/blue_onSurface"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Ingresá los números (o letras) que querés codificar. Si recién generaste un QR PESABLE, te pre-rellenamos el campo con su código de barras como atajo."
+                    android:textSize="12sp"
+                    android:textStyle="italic"
+                    android:textColor="@color/blue_onSurface"
+                    android:alpha="0.75" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilCodigoBarras"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:hint="Número del código"
+                    app:helperText="Formato CODE-128 (longitud variable)">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCodigoBarras"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textNoSuggestions"
+                        tools:text="210154001550" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGenerarBarras"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Generar código de barras" />
+
+                <!-- Container del bitmap. Se hace visible al generar. -->
+                <FrameLayout
+                    android:id="@+id/containerBarras"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="#FFFFFF"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/ivBarras"
+                        android:layout_width="match_parent"
+                        android:layout_height="140dp"
+                        android:adjustViewBounds="true"
+                        android:contentDescription="Código de barras generado" />
+                </FrameLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</ScrollView>

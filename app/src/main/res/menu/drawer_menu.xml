@@ -47,6 +47,11 @@
             android:icon="@android:drawable/ic_menu_recent_history"/>
 
         <item
+            android:id="@+id/nav_qr_pesable"
+            android:title="QR Pesable"
+            android:icon="@android:drawable/ic_menu_camera" />
+
+        <item
             android:id="@+id/nav_backup"
             android:title="Copia de seguridad"
             android:icon="@android:drawable/ic_menu_manage" />
