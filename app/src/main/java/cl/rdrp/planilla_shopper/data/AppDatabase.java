@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
                 TramosVersion.class     // Tramos editables: snapshots por modalidad
         },
         version = 13,               // Tramos editables con versionado por fecha
-        exportSchema = false
+        exportSchema = true
 )
 public abstract class AppDatabase extends RoomDatabase {
 
