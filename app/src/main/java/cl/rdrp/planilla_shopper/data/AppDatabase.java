@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
                 Local.class,            // N5: catalogo de locales
                 TramosVersion.class     // Tramos editables: snapshots por modalidad
         },
-        version = 13,               // Tramos editables con versionado por fecha
+        version = 14,               // Campos aditivos para registro
         exportSchema = true
 )
 public abstract class AppDatabase extends RoomDatabase {
@@ -199,6 +199,28 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    // 13 → 14: solo columnas nuevas; conserva los datos y cálculos existentes.
+    static final Migration MIGRATION_13_14 = new Migration(13, 14) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase db) {
+            db.execSQL("ALTER TABLE registro ADD COLUMN km_entrega REAL");
+            db.execSQL("ALTER TABLE registro ADD COLUMN km_retorno REAL");
+            db.execSQL("ALTER TABLE registro ADD COLUMN calc_origen INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN tarifa_base INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN valor_unit_sku INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN precio_litro INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN monto_base INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN monto_sku INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN monto_km INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN monto_bono_km INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN monto_bruto INTEGER NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN valor_km REAL NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN bono_por_km REAL NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN comision_porc REAL NOT NULL DEFAULT 0");
+            db.execSQL("ALTER TABLE registro ADD COLUMN rendimiento_km_litro REAL NOT NULL DEFAULT 0");
+        }
+    };
+
     public static AppDatabase get(Context ctx) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
@@ -215,7 +237,8 @@ public abstract class AppDatabase extends RoomDatabase {
                                     MIGRATION_9_10,
                                     MIGRATION_10_11,  // N4
                                     MIGRATION_11_12,  // N5
-                                    MIGRATION_12_13   // Tramos editables
+                                    MIGRATION_12_13,  // Tramos editables
+                                    MIGRATION_13_14
                             )
                             .build();
                 }

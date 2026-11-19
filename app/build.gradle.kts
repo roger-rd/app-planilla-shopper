@@ -23,6 +23,8 @@ android {
 
     }
 
+    sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
+
     buildFeatures {
         viewBinding = true
     }
@@ -75,6 +77,7 @@ dependencies {
 
     // Tests
     testImplementation(libs.junit)
+    androidTestImplementation("androidx.room:room-testing:${libs.versions.room.get()}")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 

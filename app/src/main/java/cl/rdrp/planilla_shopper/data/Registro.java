@@ -2,6 +2,7 @@ package cl.rdrp.planilla_shopper.data;
 
 
 import androidx.annotation.NonNull;
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
@@ -21,6 +22,53 @@ public class Registro {
     public long sg;
     public int ventana;
     public int cant;
+
+    // km conserva el total. calc_origen: 0 = cálculo actual; 2 reservado.
+    @ColumnInfo(name = "km_entrega")
+    public Double km_entrega;
+
+    @ColumnInfo(name = "km_retorno")
+    public Double km_retorno;
+
+    @ColumnInfo(name = "calc_origen", defaultValue = "0")
+    public int calc_origen;
+
+    @ColumnInfo(name = "tarifa_base", defaultValue = "0")
+    public long tarifa_base;
+
+    @ColumnInfo(name = "valor_unit_sku", defaultValue = "0")
+    public long valor_unit_sku;
+
+    @ColumnInfo(name = "precio_litro", defaultValue = "0")
+    public long precio_litro;
+
+    @ColumnInfo(name = "monto_base", defaultValue = "0")
+    public long monto_base;
+
+    @ColumnInfo(name = "monto_sku", defaultValue = "0")
+    public long monto_sku;
+
+    @ColumnInfo(name = "monto_km", defaultValue = "0")
+    public long monto_km;
+
+    @ColumnInfo(name = "monto_bono_km", defaultValue = "0")
+    public long monto_bono_km;
+
+    @ColumnInfo(name = "monto_bruto", defaultValue = "0")
+    public long monto_bruto;
+
+    @ColumnInfo(name = "valor_km", defaultValue = "0")
+    public double valor_km;
+
+    @ColumnInfo(name = "bono_por_km", defaultValue = "0")
+    public double bono_por_km;
+
+    @ColumnInfo(name = "comision_porc", defaultValue = "0")
+    public double comision_porc;
+
+    @ColumnInfo(name = "rendimiento_km_litro", defaultValue = "0")
+    public double rendimiento_km_litro;
+
 
     /**
      * Modalidad de trabajo con la que se creó el registro (N4).
