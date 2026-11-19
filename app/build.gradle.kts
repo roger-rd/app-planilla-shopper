@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace = "cl.rdrp.planilla_shopper"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "cl.rdrp.planilla_shopper"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 28
         versionName = "1.0.11"
 
