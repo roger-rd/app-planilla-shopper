@@ -54,10 +54,30 @@ public class LocalPickerDialog {
                                String titulo,
                                boolean cancelable,
                                OnSeleccion callback) {
+        mostrar(activity, titulo, null, cancelable, callback);
+    }
+
+    /**
+     * Variante con intro opcional, util para el flujo inicial de bienvenida
+     * donde queremos un mensaje explicativo arriba de la lista de salas.
+     * Si intro es null o vacio, se mantiene el texto por defecto del XML.
+     */
+    public static void mostrar(android.app.Activity activity,
+                               String titulo,
+                               String intro,
+                               boolean cancelable,
+                               OnSeleccion callback) {
         View v = LayoutInflater.from(activity).inflate(R.layout.dialog_local, null);
         LinearLayout contenedor = v.findViewById(R.id.contenedorLocales);
         LinearLayout contenedorVacio = v.findViewById(R.id.contenedorVacio);
         MaterialButton btnIrACrear = v.findViewById(R.id.btnIrACrearLocal);
+
+        // Sobrescribir el intro si se paso (flujo inicial). Si no, queda el
+        // texto del XML que es generico para cambio normal desde el drawer.
+        if (intro != null && !intro.trim().isEmpty()) {
+            TextView tvIntro = v.findViewById(R.id.tvDialogLocalIntro);
+            if (tvIntro != null) tvIntro.setText(intro);
+        }
 
         AlertDialog dialog = new MaterialAlertDialogBuilder(activity)
                 .setTitle(titulo)
