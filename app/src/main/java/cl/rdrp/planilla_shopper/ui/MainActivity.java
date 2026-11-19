@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         //   2do: modalidad (si no tiene)
         // Se encadenan para que no aparezcan al mismo tiempo. Si el usuario
         // ya tiene ambos seteados, no se muestra nada.
-        mostrarPopupsBienvenidaEncadenados();
+        mostrarSetupInicial();
 
         // Aplicar visibilidad de campos segun modalidad (N2)
         aplicarVisibilidadPorModalidad();
@@ -218,6 +218,11 @@ public class MainActivity extends AppCompatActivity {
         // N5: si el usuario cambio de sala desde el drawer o desde Locales,
         // refrescar el badge al volver a Main.
         actualizarBadgeSalaActiva();
+        // Onboarding: si el usuario volvio de LocalesActivity habiendo creado
+        // la primera sala (caso vacio del popup inicial), o si restauro un
+        // backup parcial, reanudar el flow. El metodo tiene guard temprano,
+        // asi que es no-op si ya hay sala + modalidad.
+        mostrarSetupInicial();
     }
 
     /**
@@ -246,28 +251,254 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Encadena los popups de bienvenida (local primero, modalidad despues).
-     * Decisiones N5:
-     *   - Si no hay local activo, mostrar popup local (no cancelable).
-     *     Al elegir, si tampoco hay modalidad, mostrar el de modalidad.
-     *   - Si ya hay local pero no hay modalidad, mostrar solo el de modalidad.
-     *   - Si ya hay ambos, no mostrar nada.
+     * Flag que indica que el dialog de setup inicial esta actualmente
+     * desplegado. Sirve para:
+     *   - Evitar que onResume re-dispare el dialog en bucle mientras ya
+     *     esta visible.
+     *   - Distinguir "elegir sala+modalidad porque arranco la app sin
+     *     configurar" vs "cambio normal desde el drawer" — solo el primer
+     *     caso muestra el snackbar final.
      */
-    private void mostrarPopupsBienvenidaEncadenados() {
-        if (!Prefs.hasLocalActivo(this)) {
-            LocalPickerDialog.mostrar(this,
-                    "¡Bienvenido! Indicá tu sala",
-                    false,
-                    elegido -> {
-                        Toast.makeText(this,
-                                "Sala activa: " + elegido.display(),
-                                Toast.LENGTH_SHORT).show();
-                        if (!Prefs.hasModalidad(this)) {
-                            mostrarPopupBienvenidaModalidad();
+    private boolean flujoInicialEnCurso = false;
+
+    /**
+     * Setup inicial unificado: UN solo dialog que configura sala + modalidad
+     * en una sola pantalla. Reemplaza el flujo encadenado anterior que
+     * mandaba al usuario a LocalesActivity en el medio y obligaba a cerrar
+     * y abrir la app para terminar.
+     *
+     * Reglas:
+     *   - Idempotente: si ya hay sala + modalidad, no hace nada (seguro
+     *     llamarlo desde onResume libremente).
+     *   - No-cancelable: la unica salida es el boton "Comenzar" tras
+     *     validar las dos secciones.
+     *   - No persiste nada hasta que el usuario toca "Comenzar": si elige
+     *     "+ Crear nueva sala", la sala se INSERTA en DB solo al confirmar.
+     *
+     * Layout: res/layout/dialog_setup_inicial.xml.
+     */
+    private void mostrarSetupInicial() {
+        // Idempotente: si ya esta todo configurado, salir.
+        if (Prefs.hasLocalActivo(this) && Prefs.hasModalidad(this)) {
+            flujoInicialEnCurso = false;
+            return;
+        }
+        // Evitar reentrada si el dialog ya esta desplegado.
+        if (flujoInicialEnCurso) return;
+        flujoInicialEnCurso = true;
+
+        android.view.View view = android.view.LayoutInflater.from(this)
+                .inflate(R.layout.dialog_setup_inicial, null);
+
+        // Referencias UI
+        final com.google.android.material.textfield.TextInputLayout tilSelectorSala =
+                view.findViewById(R.id.tilSelectorSala);
+        final android.widget.AutoCompleteTextView actvSala =
+                view.findViewById(R.id.actvSala);
+        final android.widget.LinearLayout contNuevaSala =
+                view.findViewById(R.id.contNuevaSala);
+        final com.google.android.material.textfield.TextInputLayout tilCodigoNueva =
+                view.findViewById(R.id.tilCodigoNueva);
+        final com.google.android.material.textfield.TextInputEditText etCodigoNueva =
+                view.findViewById(R.id.etCodigoNueva);
+        final com.google.android.material.textfield.TextInputEditText etAliasNueva =
+                view.findViewById(R.id.etAliasNueva);
+
+        // Estado mutable de la seleccion (final arrays porque se usan en
+        // lambdas y necesitan ser efectivamente "mutables").
+        final String[] codigoSalaElegida = { null };  // codigo elegido del dropdown
+        final boolean[] crearNuevaSala = { false };   // true si el usuario eligio "+ Crear nueva"
+        final Modalidad[] modalidadElegida = { null };
+
+        // Cargar salas async y poblar el dropdown. Si el catalogo esta
+        // vacio, forzar el modo "crear nueva" sin mostrar el selector.
+        AppDatabase.ioExecutor.execute(() -> {
+            java.util.List<cl.rdrp.planilla_shopper.data.Local> salas =
+                    AppDatabase.get(this).localDao().listActivos();
+            runOnUiThread(() -> {
+                if (salas == null || salas.isEmpty()) {
+                    // Sin salas: forzar modo creacion sin opcion de elegir.
+                    tilSelectorSala.setVisibility(android.view.View.GONE);
+                    contNuevaSala.setVisibility(android.view.View.VISIBLE);
+                    crearNuevaSala[0] = true;
+                } else {
+                    // Hay salas: armar lista display + opcion "+ Crear nueva"
+                    // al final. Cuando el usuario elige esta ultima, se
+                    // muestran los inputs.
+                    final String OPCION_NUEVA = "+ Crear nueva sala";
+                    java.util.List<String> items = new java.util.ArrayList<>();
+                    for (cl.rdrp.planilla_shopper.data.Local l : salas) {
+                        items.add(l.display());
+                    }
+                    items.add(OPCION_NUEVA);
+                    android.widget.ArrayAdapter<String> adapter =
+                            new android.widget.ArrayAdapter<>(this,
+                                    android.R.layout.simple_list_item_1, items);
+                    actvSala.setAdapter(adapter);
+                    actvSala.setOnItemClickListener((parent, v, pos, id) -> {
+                        if (OPCION_NUEVA.equals(items.get(pos))) {
+                            crearNuevaSala[0] = true;
+                            codigoSalaElegida[0] = null;
+                            contNuevaSala.setVisibility(android.view.View.VISIBLE);
+                            etCodigoNueva.requestFocus();
+                        } else {
+                            crearNuevaSala[0] = false;
+                            codigoSalaElegida[0] = salas.get(pos).codigo;
+                            contNuevaSala.setVisibility(android.view.View.GONE);
                         }
+                        tilSelectorSala.setError(null);
                     });
-        } else if (!Prefs.hasModalidad(this)) {
-            mostrarPopupBienvenidaModalidad();
+                }
+            });
+        });
+
+        // Cards de modalidad — seleccion mutuamente exclusiva con tinte
+        // primaryContainer en la elegida (mismo patron que dialog_modalidad).
+        final java.util.Map<Integer, Modalidad> cardsModalidad = new java.util.LinkedHashMap<>();
+        cardsModalidad.put(R.id.cardSetupShopper, Modalidad.SHOPPER);
+        cardsModalidad.put(R.id.cardSetupPicker,  Modalidad.PICKER);
+        cardsModalidad.put(R.id.cardSetupDriver,  Modalidad.DRIVER);
+
+        final int colorTinte = androidx.core.content.ContextCompat.getColor(
+                this, R.color.blue_primaryContainer);
+        final int colorDefault = androidx.core.content.ContextCompat.getColor(
+                this, R.color.blue_surface);
+
+        for (java.util.Map.Entry<Integer, Modalidad> e : cardsModalidad.entrySet()) {
+            com.google.android.material.card.MaterialCardView card =
+                    view.findViewById(e.getKey());
+            Modalidad m = e.getValue();
+            card.setOnClickListener(v -> {
+                modalidadElegida[0] = m;
+                // Reset visual: todas vuelven al color default, solo la
+                // elegida queda tintada.
+                for (Integer id : cardsModalidad.keySet()) {
+                    com.google.android.material.card.MaterialCardView c = view.findViewById(id);
+                    c.setCardBackgroundColor(id == e.getKey() ? colorTinte : colorDefault);
+                }
+            });
+        }
+
+        // Construir el AlertDialog con boton positivo MANUAL (positiveButton
+        // = null) para poder validar SIN cerrar el dialog si la validacion
+        // falla. El setOnShowListener engancha el listener real al boton.
+        final androidx.appcompat.app.AlertDialog dialog =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                        .setTitle("¡Bienvenido a Planilla Shopper!")
+                        .setView(view)
+                        .setCancelable(false)
+                        .setPositiveButton("Comenzar", null)
+                        .create();
+
+        dialog.setOnShowListener(d -> {
+            android.widget.Button btnComenzar = dialog.getButton(
+                    androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE);
+            btnComenzar.setOnClickListener(v -> procesarSetupInicial(
+                    dialog,
+                    tilSelectorSala, tilCodigoNueva,
+                    etCodigoNueva, etAliasNueva,
+                    codigoSalaElegida, crearNuevaSala, modalidadElegida));
+        });
+
+        dialog.show();
+    }
+
+    /**
+     * Valida + persiste el setup. Se invoca al tocar "Comenzar". Si algo
+     * falta, deja el dialog abierto con error visible. Si todo OK:
+     *   1) Inserta la sala nueva (si aplica) en DB.
+     *   2) Setea Prefs (sala activa + modalidad).
+     *   3) Cierra el dialog.
+     *   4) Refresca UI (badge sala + visibilidad campos por modalidad).
+     *   5) Snackbar de confirmacion.
+     */
+    private void procesarSetupInicial(
+            androidx.appcompat.app.AlertDialog dialog,
+            com.google.android.material.textfield.TextInputLayout tilSelectorSala,
+            com.google.android.material.textfield.TextInputLayout tilCodigoNueva,
+            com.google.android.material.textfield.TextInputEditText etCodigoNueva,
+            com.google.android.material.textfield.TextInputEditText etAliasNueva,
+            String[] codigoSalaElegida, boolean[] crearNuevaSala,
+            Modalidad[] modalidadElegida) {
+
+        // 1) Validar modalidad
+        if (modalidadElegida[0] == null) {
+            Toast.makeText(this,
+                    "Elegí tu modalidad de trabajo",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 2) Validar sala
+        final String codigoFinal;
+        final String aliasFinal;
+        final boolean esNueva = crearNuevaSala[0];
+
+        if (esNueva) {
+            String cod = Texts.s(etCodigoNueva.getText());
+            if (cod.isEmpty()) {
+                tilCodigoNueva.setError("Ingresá el código de la sala");
+                return;
+            }
+            tilCodigoNueva.setError(null);
+            codigoFinal = cod;
+            String alias = Texts.s(etAliasNueva.getText());
+            aliasFinal = alias.isEmpty() ? null : alias;
+        } else {
+            if (codigoSalaElegida[0] == null) {
+                tilSelectorSala.setError("Elegí una sala");
+                return;
+            }
+            tilSelectorSala.setError(null);
+            codigoFinal = codigoSalaElegida[0];
+            aliasFinal = null;
+        }
+
+        // 3) Persistir async. Si era sala nueva, INSERT en DB primero (con
+        // chequeo de no duplicar). Despues setear Prefs y refrescar UI.
+        final Modalidad mod = modalidadElegida[0];
+
+        AppDatabase.ioExecutor.execute(() -> {
+            if (esNueva) {
+                cl.rdrp.planilla_shopper.data.Local previo =
+                        AppDatabase.get(this).localDao().findByCodigo(codigoFinal);
+                if (previo == null) {
+                    cl.rdrp.planilla_shopper.data.Local nuevo =
+                            new cl.rdrp.planilla_shopper.data.Local(codigoFinal, aliasFinal);
+                    AppDatabase.get(this).localDao().insert(nuevo);
+                }
+                // Si ya existia (rara vez: el dropdown deberia haberla
+                // mostrado), tomamos su codigo igual.
+            }
+            runOnUiThread(() -> {
+                Prefs.setLocalActivo(this, codigoFinal);
+                Prefs.setModalidad(this, mod);
+                dialog.dismiss();
+                aplicarVisibilidadPorModalidad();
+                actualizarBadgeSalaActiva();
+                finalizarFlujoInicial();
+            });
+        });
+    }
+
+    /**
+     * Cierre del flujo inicial: limpia el flag y muestra el snackbar de
+     * confirmacion. Solo se ejecuta efectivamente si veniamos de un setup
+     * inicial real (flag activo); si se llama desde cambio normal del
+     * drawer es no-op.
+     */
+    private void finalizarFlujoInicial() {
+        if (!flujoInicialEnCurso) return;
+        flujoInicialEnCurso = false;
+        try {
+            com.google.android.material.snackbar.Snackbar.make(
+                    vb.getRoot(),
+                    "Configuración inicial completada",
+                    com.google.android.material.snackbar.Snackbar.LENGTH_LONG
+            ).show();
+        } catch (Exception ignored) {
+            // Defensivo: si por algun motivo no podemos mostrar el snackbar
+            // (ej. la vista raiz no esta disponible), no rompemos el flujo.
         }
     }
 
@@ -295,21 +526,6 @@ public class MainActivity extends AppCompatActivity {
             ((android.widget.LinearLayout.LayoutParams) lp).weight = weight;
             v.setLayoutParams(lp);
         }
-    }
-
-    /**
-     * Popup no-cancelable que pide elegir modalidad la primera vez que
-     * el usuario abre la app. Solo se muestra una vez (despues hasModalidad
-     * retorna true).
-     */
-    private void mostrarPopupBienvenidaModalidad() {
-        mostrarDialogoModalidad(
-                "¡Bienvenido! Elige tu modalidad",
-                "Para empezar, indica cuál es tu modalidad de trabajo. " +
-                        "Puedes cambiarla después desde el menú lateral.",
-                null,           // sin modalidad actual (es la primera vez)
-                false           // no se puede cancelar
-        );
     }
 
     /**

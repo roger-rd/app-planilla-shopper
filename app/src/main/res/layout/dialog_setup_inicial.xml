@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Setup inicial unificado: una sola pantalla que configura sala + modalidad
+  en un solo paso. Reemplaza el flow encadenado anterior que mandaba al
+  usuario a LocalesActivity en el medio del onboarding.
+
+  Estructura:
+    1) Mensaje de bienvenida + instruccion breve
+    2) Seccion Sala: dropdown con salas existentes + opcion inline de
+       crear nueva (despliega inputs codigo/alias en el mismo popup)
+    3) Seccion Modalidad: 3 cards seleccionables (Shopper/Picker/Driver)
+    4) (El boton "Comenzar" lo agrega el AlertDialog, no esta aca)
+
+  El dialog que monta este view es no-cancelable; la unica salida es el
+  boton "Comenzar" tras validar.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:maxHeight="600dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <!-- Intro -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Antes de empezar, configurá tu sala de trabajo y tu modalidad."
+            android:textSize="14sp"
+            android:textColor="@color/blue_onSurface"
+            android:alpha="0.85" />
+
+        <!-- =================== SALA DE TRABAJO =================== -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Sala de trabajo"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="@color/blue_primary" />
+
+        <!-- Dropdown con las salas existentes + opcion final
+             "+ Crear nueva sala". Si el catalogo esta vacio, lo
+             ocultamos por codigo y mostramos directamente los inputs. -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSelectorSala"
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:hint="Elegí tu sala">
+
+            <AutoCompleteTextView
+                android:id="@+id/actvSala"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Inputs para crear sala nueva. Inicialmente ocultos; se
+             muestran cuando el usuario elige "+ Crear nueva sala" o
+             cuando el catalogo arranca vacio. -->
+        <LinearLayout
+            android:id="@+id/contNuevaSala"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilCodigoNueva"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Código de la sala">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etCodigoNueva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:digits="0123456789" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilAliasNueva"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:hint="Alias (opcional)"
+                app:helperText="Ej: Las Condes, Bilbao, Centro">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etAliasNueva"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords"
+                    android:maxLength="40" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <!-- =================== MODALIDAD DE TRABAJO =================== -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Modalidad de trabajo"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:textColor="@color/blue_primary" />
+
+        <!-- Card SHOPPER -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSetupShopper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/blue_primary"
+            app:strokeWidth="1dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Shopper"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="@color/blue_primary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Maneja todos los campos (SKU y KM)"
+                    android:textSize="12sp"
+                    android:textColor="@color/blue_onSurface"
+                    android:alpha="0.8" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Card PICKER -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSetupPicker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/blue_primary"
+            app:strokeWidth="1dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Picker"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="@color/blue_primary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Solo hace el pedido. NO usa KM."
+                    android:textSize="12sp"
+                    android:textColor="@color/blue_onSurface"
+                    android:alpha="0.8" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Card DRIVER -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSetupDriver"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/blue_primary"
+            app:strokeWidth="1dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Driver"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:textColor="@color/blue_primary" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Maneja KM y entrega. NO usa SKU."
+                    android:textSize="12sp"
+                    android:textColor="@color/blue_onSurface"
+                    android:alpha="0.8" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</ScrollView>
