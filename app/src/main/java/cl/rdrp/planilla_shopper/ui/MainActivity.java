@@ -18,6 +18,8 @@ import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
 import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
+import cl.rdrp.planilla_shopper.util.CalculoNuevoRegistro;
+import cl.rdrp.planilla_shopper.util.Config;
 import cl.rdrp.planilla_shopper.databinding.ActivityMainBinding;
 import cl.rdrp.planilla_shopper.util.Fechas;
 import cl.rdrp.planilla_shopper.util.Parsers;
@@ -132,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         vb.etKm.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789,."));
+        vb.etKmRetorno.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789,."));
         vb.etSg.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789,."));
         vb.etVentana.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789,."));
 
@@ -274,38 +277,13 @@ public class MainActivity extends AppCompatActivity {
      * sigue mostrando todos los campos para no perder funcionalidad al
      * editar registros viejos hechos en otra modalidad.
      *
-     *   SHOPPER -> ambos visibles, weight 1 cada uno (estado original).
-     *   PICKER  -> oculta KM. SKU ocupa la fila completa (weight 2).
-     *   DRIVER  -> oculta SKU. KM ocupa la fila completa (weight 2).
+     * Ventana siempre visible; Picker oculta la fila KM; Driver oculta SKU.
      */
     private void aplicarVisibilidadPorModalidad() {
         Modalidad m = Prefs.getModalidad(this);
-
-        com.google.android.material.textfield.TextInputLayout tilSku =
-                findViewById(R.id.tilSku);
-        com.google.android.material.textfield.TextInputLayout tilKm =
-                findViewById(R.id.tilKm);
-
-        // Reset a default (ambos visibles, weight 1) y desde ahi ajustar.
-        setRowVisibility(tilSku, true,  1f);
-        setRowVisibility(tilKm,  true,  1f);
-
-        switch (m) {
-            case PICKER:
-                // Sin KM: el campo SKU ocupa ancho completo.
-                setRowVisibility(tilKm,  false, 1f);
-                setRowVisibility(tilSku, true,  2f);
-                break;
-            case DRIVER:
-                // Sin SKU: el campo KM ocupa ancho completo.
-                setRowVisibility(tilSku, false, 1f);
-                setRowVisibility(tilKm,  true,  2f);
-                break;
-            case SHOPPER:
-            default:
-                // Ambos visibles con weight 1 (ya quedo seteado arriba).
-                break;
-        }
+        setRowVisibility(vb.tilSku, m != Modalidad.DRIVER, 1f);
+        vb.rowKm.setVisibility(m == Modalidad.PICKER
+                ? android.view.View.GONE : android.view.View.VISIBLE);
     }
 
     /** Helper que ajusta visibility + layout_weight de un hijo de LinearLayout horizontal. */
@@ -546,7 +524,8 @@ public class MainActivity extends AppCompatActivity {
         String kmS      = Texts.s(vb.etKm.getText());
         String sgS      = Texts.s(vb.etSg.getText());
         String ventanaS = Texts.s(vb.etVentana.getText());
-        String cantS    = Texts.s(vb.etCant.getText());
+        String retornoS = Texts.s(vb.etKmRetorno.getText());
+        if (retornoS.isEmpty()) retornoS = "0";
 
         if (local.isEmpty()) {
             Toast.makeText(this,
@@ -563,12 +542,13 @@ public class MainActivity extends AppCompatActivity {
         Modalidad modalidad = Prefs.getModalidad(this);
         if (modalidad == Modalidad.PICKER) {
             kmS = "0";  // Picker no usa KM
+            retornoS = "0";
         } else if (modalidad == Modalidad.DRIVER) {
             sku = "0";  // Driver no usa SKU
         }
 
         // Campos obligatorios (el local ya esta validado arriba)
-        if (fecha.isEmpty() || sku.isEmpty() || kmS.isEmpty() || sgS.isEmpty() || ventanaS.isEmpty() || cantS.isEmpty()) {
+        if (fecha.isEmpty() || sku.isEmpty() || kmS.isEmpty() || sgS.isEmpty() || ventanaS.isEmpty()) {
             Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -578,10 +558,10 @@ public class MainActivity extends AppCompatActivity {
         Double  kmD     = Parsers.parseDoubleOrNull(kmS);
         Long    sgL     = Parsers.parseLongOrNull(sgS);
         Integer venI    = Parsers.parseIntOrNull(ventanaS);
-        Integer cantI   = Parsers.parseIntOrNull(cantS);
+        Double retornoD = Parsers.parseDoubleOrNull(retornoS);
 
-        if (skuQtyI == null || kmD == null || sgL == null || venI == null || cantI == null) {
-            Toast.makeText(this, "SKU, KM, SG, Ventana y Cant deben ser numéricos", Toast.LENGTH_SHORT).show();
+        if (skuQtyI == null || kmD == null || sgL == null || venI == null || retornoD == null) {
+            Toast.makeText(this, "SKU, KM, SG y Ventana deben ser numéricos", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -589,9 +569,10 @@ public class MainActivity extends AppCompatActivity {
         double km     = kmD;
         long   sg     = sgL;
         int    ventana= venI;
-        int    cant   = cantI;
+        int    cant   = 0; // Valor neutro solo para altas nuevas.
 
-        if (km < 0)      { Toast.makeText(this, "KM no puede ser negativo", Toast.LENGTH_SHORT).show(); return; }
+        if (!Double.isFinite(km) || !Double.isFinite(retornoD)
+                || !Double.isFinite(km + retornoD) || km < 0 || retornoD < 0) { Toast.makeText(this, "KM debe ser finito y no negativo", Toast.LENGTH_SHORT).show(); return; }
         if (sg < 0)      { Toast.makeText(this, "SG no puede ser negativo", Toast.LENGTH_SHORT).show(); return; }
         if (ventana < 0) { Toast.makeText(this, "Ventana no puede ser negativa", Toast.LENGTH_SHORT).show(); return; }
 
@@ -599,9 +580,18 @@ public class MainActivity extends AppCompatActivity {
         // N4: estampar la modalidad activa al momento de crear. Asi el
         // registro recuerda con que parametros fue creado, aunque despues
         // el usuario cambie su modalidad activa.
-        r.modalidad = Prefs.getModalidad(this).name();
+        r.modalidad = modalidad.name();
 
         AppDatabase.ioExecutor.execute(() -> {
+            double totalKm = modalidad == Modalidad.PICKER ? 0.0
+                    : CalculoNuevoRegistro.sumarKm(km, retornoD);
+            CalculoNuevoRegistro.completar(r, km, retornoD,
+                    Config.basePorSku(skuQty, modalidad, fecha),
+                    Config.getValorUnitSku(modalidad), Config.getValorKm(fecha),
+                    Config.getBonoPorKmDomLunMar(modalidad),
+                    Math.round(Config.calcularBonoKm(totalKm, fecha, modalidad, local)),
+                    Config.getComisionPorc(modalidad),
+                    Config.getRendimientoKmPorLitro(modalidad), Config.getPrecioLitro(modalidad));
             AppDatabase.get(this).registroDao().insertIgnore(r);
             runOnUiThread(() -> {
                 Toast.makeText(this, "Guardado", Toast.LENGTH_SHORT).show();
@@ -616,7 +606,7 @@ public class MainActivity extends AppCompatActivity {
         vb.etKm.setText("");
         vb.etSg.setText("");
         vb.etVentana.setText("");
-        vb.etCant.setText("");
+        vb.etKmRetorno.setText("");
     }
 
     private void mostrarDialogoBono() {

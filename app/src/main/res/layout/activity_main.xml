@@ -151,7 +151,7 @@
                                 android:maxLength="12" />
                         </com.google.android.material.textfield.TextInputLayout>
 
-                        <!-- Ventana + Cantidad -->
+                        <!-- Ventana + SKU -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -180,40 +180,10 @@
                             </com.google.android.material.textfield.TextInputLayout>
 
                             <com.google.android.material.textfield.TextInputLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginStart="6dp"
-                                android:layout_weight="1"
-                                android:hint="Artículos"
-                                app:boxCornerRadiusBottomEnd="10dp"
-                                app:boxCornerRadiusBottomStart="10dp"
-                                app:boxCornerRadiusTopEnd="10dp"
-                                app:boxCornerRadiusTopStart="10dp"
-                                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/etCant"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:digits="0123456789"
-                                    android:inputType="number" />
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                        </LinearLayout>
-
-                        <!-- SKU + KM -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="20dp"
-                            android:orientation="horizontal"
-                            android:weightSum="2">
-
-                            <com.google.android.material.textfield.TextInputLayout
                                 android:id="@+id/tilSku"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginEnd="6dp"
+                                android:layout_marginStart="6dp"
                                 android:layout_weight="1"
                                 android:hint="SKU"
                                 app:boxCornerRadiusBottomEnd="10dp"
@@ -230,13 +200,24 @@
                                     android:inputType="number" />
                             </com.google.android.material.textfield.TextInputLayout>
 
+                        </LinearLayout>
+
+                        <!-- KM entrega + KM retorno -->
+                        <LinearLayout
+                            android:id="@+id/rowKm"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="20dp"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
                             <com.google.android.material.textfield.TextInputLayout
                                 android:id="@+id/tilKm"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="6dp"
+                                android:layout_marginEnd="6dp"
                                 android:layout_weight="1"
-                                android:hint="KM"
+                                android:hint="KM entrega"
                                 app:boxCornerRadiusBottomEnd="10dp"
                                 app:boxCornerRadiusBottomStart="10dp"
                                 app:boxCornerRadiusTopEnd="10dp"
@@ -245,6 +226,27 @@
 
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/etKm"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:digits="0123456789.,"
+                                    android:inputType="numberDecimal" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                android:id="@+id/tilKmRetorno"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:layout_weight="1"
+                                android:hint="KM retorno"
+                                app:boxCornerRadiusBottomEnd="10dp"
+                                app:boxCornerRadiusBottomStart="10dp"
+                                app:boxCornerRadiusTopEnd="10dp"
+                                app:boxCornerRadiusTopStart="10dp"
+                                style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/etKmRetorno"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:digits="0123456789.,"
