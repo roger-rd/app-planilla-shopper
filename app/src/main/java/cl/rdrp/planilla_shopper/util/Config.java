@@ -61,6 +61,8 @@ public class Config {
     public static final int    DEFAULT_PRECIO_LITRO              = 1200;
     public static final double DEFAULT_BONO_POR_KM_DOM_LUN_MAR   = 100.0;
 
+    public static final double DEFAULT_VALOR_KM_NUEVO = 276.0;
+
     // ===== Getters de parametros configurables (Fase 4b + N3) =====
     //
     // Sin args -> modalidad activa (uso normal desde los calculos).
@@ -100,6 +102,16 @@ public class Config {
     }
     public static double getBonoPorKmDomLunMar(Modalidad m) {
         return Prefs.getBonoPorKmDomLunMar(App.get(), m);
+    }
+
+    public static double getValorKmNuevo(Modalidad m) {
+        return Prefs.getValorKmNuevo(App.get(), m);
+    }
+
+    public static BonoConfig bonoConfig(Modalidad m) {
+        return new BonoConfig(Prefs.getBonoKmActivo(App.get(), m),
+                Prefs.getBonoKmMonto(App.get(), m), Prefs.getBonoKmDias(App.get(), m),
+                Prefs.getBonoKmSalas(App.get(), m));
     }
 
     // ===== Reglas duras (no configurables) =====

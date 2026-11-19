@@ -2,13 +2,15 @@ package cl.rdrp.planilla_shopper.util;
 
 /** Version del backup y decisiones de importacion independientes de Android. */
 public final class BackupVersion {
-    public static final int BACKUP_VERSION_CURRENT = 4;
+    public static final int BACKUP_VERSION_CURRENT = 5;
 
     private BackupVersion() {}
 
     public static ImportDecision forImport(int version) {
         String message;
-        if (version >= 4) {
+        if (version >= 5) {
+            message = "Backup V5 importado completo (registros con modalidad, combustibles y bonos)";
+        } else if (version >= 4) {
             message = "Backup V4 importado completo (registros con modalidad, combustibles y bonos)";
         } else if (version >= 3) {
             message = "Backup V3 importado completo (registros con modalidad, combustibles y bonos)";

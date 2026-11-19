@@ -9,7 +9,21 @@ import cl.rdrp.planilla_shopper.data.Registro;
  * Config (Prefs, TramosResolver, fecha y BonoKmPolicy), sin duplicar esas reglas.
  * No descuenta comisión ni combustible del bruto, igual que RegistroAdapter. */
 public final class CalculoNuevoRegistro {
+    public static final int ORIGEN_1_1_1 = 2;
+    public static final int ORIGEN_BONO_CONFIG = 3;
+
     private CalculoNuevoRegistro() {}
+
+    public static boolean esNuevo(Registro r) {
+        return r.calc_origen == ORIGEN_1_1_1 || r.calc_origen == ORIGEN_BONO_CONFIG;
+    }
+
+    /** Convierte el marcador junto con la tarifa; conserva los montos originales. */
+    public static void normalizarOrigen111(Registro r) {
+        if (r.calc_origen != ORIGEN_1_1_1) return;
+        normalizarBonoSnapshot111(r);
+        r.calc_origen = ORIGEN_BONO_CONFIG;
+    }
 
     public static double sumarKm(double entrega, double retorno) {
         // Suma decimal antes de convertir a REAL: 1.55 + 1.53 queda como 3.08.
@@ -19,20 +33,24 @@ public final class CalculoNuevoRegistro {
     /** Edita únicamente los KM del snapshot; sin cambios conserva incluso los montos.
      * No consulta Prefs ni tramos: fecha, sala y tarifas pertenecen al pedido. */
     public static void editarKm(Registro r, double entrega, double retorno) {
-        if (r.calc_origen != 2) throw new IllegalArgumentException("El pedido no usa cálculo nuevo");
+        if (!esNuevo(r)) throw new IllegalArgumentException("El pedido no usa cálculo nuevo");
         Modalidad modalidad = Modalidad.fromName(r.modalidad);
-        if (modalidad == Modalidad.PICKER) return;
+        if (modalidad == Modalidad.PICKER) {
+            normalizarOrigen111(r);
+            return;
+        }
         if (!Double.isFinite(entrega) || !Double.isFinite(retorno)
                 || !Double.isFinite(entrega + retorno) || entrega < 0 || retorno < 0) {
             throw new IllegalArgumentException("KM debe ser finito y no negativo");
         }
+        normalizarOrigen111(r);
         if (r.km_entrega != null && r.km_retorno != null
                 && r.km_entrega == entrega && r.km_retorno == retorno) return;
         r.km_entrega = entrega;
         r.km_retorno = retorno;
         r.km = sumarKm(entrega, retorno);
         r.monto_km = Math.round(r.km * r.valor_km);
-        r.monto_bono_km = Config.bonoKmAplica(r.fecha, modalidad, r.local)
+        r.monto_bono_km = r.bono_por_km > 0
                 ? Math.round(r.km * r.bono_por_km) : 0;
         r.monto_bruto = r.monto_base + r.monto_sku + r.monto_km + r.monto_bono_km;
     }
@@ -46,7 +64,7 @@ public final class CalculoNuevoRegistro {
      * Sin cambios numéricos conserva todos los campos, incluido el texto del SKU. */
     public static void editarSkuYKm(Registro r, int nuevoSku, double entrega,
                                     double retorno, ResolverBase resolver) {
-        if (r.calc_origen != 2) throw new IllegalArgumentException("El pedido no usa cálculo nuevo");
+        if (!esNuevo(r)) throw new IllegalArgumentException("El pedido no usa cálculo nuevo");
         Modalidad modalidad = Modalidad.fromName(r.modalidad);
         int anterior = Parsers.parseIntOrZero(r.sku);
         boolean cambiaSku = modalidad != Modalidad.DRIVER && anterior != nuevoSku;
@@ -69,6 +87,39 @@ public final class CalculoNuevoRegistro {
     /** Sin tramo para SKU <= 0; los positivos comparten los límites inclusivos del resolver. */
     private static int tramo(int sku) {
         return sku <= 0 ? 0 : TramosResolver.indiceTramo(sku);
+    }
+
+    /** Alta con parámetros nuevos. La tarifa positiva guarda el derecho aun con cero KM. */
+    public static void completarNuevo(Registro r, double entrega, double retorno,
+                                      int tarifaBase, int valorUnitSku, double valorKm,
+                                      BonoConfig bono, String sala, double comision,
+                                      double rendimiento, int precioLitro) {
+        boolean derecho = Modalidad.fromName(r.modalidad) != Modalidad.PICKER
+                && BonoConfig.derecho(bono, r.fecha, sala) && bono.monto > 0;
+        double tarifa = derecho ? bono.monto : 0.0;
+        long monto = derecho ? Math.round(sumarKm(entrega, retorno) * tarifa) : 0;
+        completar(r, entrega, retorno, tarifaBase, valorUnitSku, valorKm, tarifa,
+                monto, comision, rendimiento, precioLitro);
+        r.calc_origen = ORIGEN_BONO_CONFIG;
+    }
+
+    @FunctionalInterface
+    public interface DerechoLegacy {
+        boolean aplica(String fecha, Modalidad modalidad, String sala);
+    }
+
+    /** Normaliza SOLO snapshots 1.1.1, antes de editar: no cambia ningún monto.
+     * El llamador convierte el marcador al completar la normalización.
+     * No ejecutar sobre altas nuevas: su derecho puede diferir de la regla legacy. */
+    public static boolean normalizarBonoSnapshot111(Registro r, DerechoLegacy legacy) {
+        if (r.calc_origen != ORIGEN_1_1_1 || r.bono_por_km == 0.0
+                || legacy.aplica(r.fecha, Modalidad.fromName(r.modalidad), r.local)) return false;
+        r.bono_por_km = 0.0;
+        return true;
+    }
+
+    public static boolean normalizarBonoSnapshot111(Registro r) {
+        return normalizarBonoSnapshot111(r, Config::bonoKmAplica);
     }
 
     /** Solo para registros nuevos: no modifica cant ni datos de pedidos históricos.
@@ -97,6 +148,6 @@ public final class CalculoNuevoRegistro {
         r.monto_km = Math.round(r.km * valorKm);
         r.monto_bono_km = usaKm ? montoBonoKm : 0;
         r.monto_bruto = r.monto_base + r.monto_sku + r.monto_km + r.monto_bono_km;
-        r.calc_origen = 2;
+        r.calc_origen = ORIGEN_1_1_1;
     }
 }

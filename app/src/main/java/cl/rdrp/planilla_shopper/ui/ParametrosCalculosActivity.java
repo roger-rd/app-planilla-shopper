@@ -17,6 +17,7 @@ import java.util.Locale;
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.BonosFormulario;
 import cl.rdrp.planilla_shopper.util.Parsers;
 import cl.rdrp.planilla_shopper.util.Prefs;
 import cl.rdrp.planilla_shopper.util.Texts;
@@ -25,9 +26,8 @@ import cl.rdrp.planilla_shopper.util.Texts;
  * Pantalla de parametros de calculo.
  *
  * Permite editar los parametros que viven en SharedPreferences via Prefs.* y
- * son leidos por Config.get*. Los tramos por SKU, valores de KM con logica
- * de fecha y reglas de dia de la semana NO son configurables (siguen duros
- * en Config).
+ * son leidos por Config.get*. El valor por KM es configurable para pedidos nuevos.
+ * Los bonos por KM se configuran en su propia pantalla.
  *
  * Comportamiento N3 (rediseno tras feedback de usuario):
  *   - La pantalla solo muestra y edita la MODALIDAD ACTIVA del usuario
@@ -56,11 +56,11 @@ import cl.rdrp.planilla_shopper.util.Texts;
 public class ParametrosCalculosActivity extends AppCompatActivity {
 
     // EditTexts
-    private TextInputEditText etValorSku, etComision, etRendimiento, etPrecioLitro, etBonoKm;
+    private TextInputEditText etValorSku, etComision, etRendimiento, etPrecioLitro, etValorKmNuevo;
     // TextInputLayouts (los wrappers — los uso para ocultar/mostrar)
-    private TextInputLayout tilValorSku, tilComision, tilRendimiento, tilPrecioLitro, tilBonoKm;
+    private TextInputLayout tilValorSku, tilComision, tilRendimiento, tilPrecioLitro, tilValorKmNuevo;
     // Subtitulo dinamico y card informativa
-    private TextView tvModalidadHint, tvValorSku;
+    private TextView tvModalidadHint, tvValorSku, tvValorKm;
 
     /** Modalidad activa del usuario. Se lee en onCreate y no cambia. */
     private Modalidad modalidadActual = Modalidad.SHOPPER;
@@ -83,18 +83,19 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
         etComision    = findViewById(R.id.etComision);
         etRendimiento = findViewById(R.id.etRendimiento);
         etPrecioLitro = findViewById(R.id.etPrecioLitro);
-        etBonoKm      = findViewById(R.id.etBonoKm);
+        etValorKmNuevo = findViewById(R.id.etValorKmNuevo);
 
         // TextInputLayouts (para ocultar segun modalidad)
         tilValorSku    = findViewById(R.id.tilValorSku);
         tilComision    = findViewById(R.id.tilComision);
         tilRendimiento = findViewById(R.id.tilRendimiento);
         tilPrecioLitro = findViewById(R.id.tilPrecioLitro);
-        tilBonoKm      = findViewById(R.id.tilBonoKm);
+        tilValorKmNuevo = findViewById(R.id.tilValorKmNuevo);
 
         // Texto informativo
         tvModalidadHint = findViewById(R.id.tvModalidadHint);
         tvValorSku      = findViewById(R.id.tvValorSku);
+        tvValorKm = findViewById(R.id.tvValorKm);
 
         aplicarVisibilidadPorModalidad();
         cargarValoresActuales();
@@ -108,7 +109,7 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
 
     /**
      * Oculta los TextInputLayouts que no aplican a la modalidad activa.
-     * - PICKER no usa KM -> oculta rendimiento, precio litro y bono km.
+     * - PICKER no usa KM -> oculta rendimiento, precio litro y valor KM.
      * - SHOPPER y DRIVER muestran todos.
      *
      * Tambien actualiza el hint para dejar claro que modalidad se edita.
@@ -119,12 +120,12 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
         tilComision.setVisibility(View.VISIBLE);
         tilRendimiento.setVisibility(View.VISIBLE);
         tilPrecioLitro.setVisibility(View.VISIBLE);
-        tilBonoKm.setVisibility(View.VISIBLE);
+        tilValorKmNuevo.setVisibility(View.VISIBLE);
 
         if (modalidadActual == Modalidad.PICKER) {
             tilRendimiento.setVisibility(View.GONE);
             tilPrecioLitro.setVisibility(View.GONE);
-            tilBonoKm.setVisibility(View.GONE);
+            tilValorKmNuevo.setVisibility(View.GONE);
         }
 
         if (tvModalidadHint != null) {
@@ -147,13 +148,17 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
         double comisionDec = Config.getComisionPorc(modalidadActual);
         double rendimiento = Config.getRendimientoKmPorLitro(modalidadActual);
         int    precioLitro = Config.getPrecioLitro(modalidadActual);
-        double bonoKm      = Config.getBonoPorKmDomLunMar(modalidadActual);
+        double valorKmNuevo = Config.getValorKmNuevo(modalidadActual);
 
         etValorSku.setText(String.valueOf(valorSku));
         etComision.setText(formatDecimal(comisionDec * 100.0));
         etRendimiento.setText(formatDecimal(rendimiento));
         etPrecioLitro.setText(String.valueOf(precioLitro));
-        etBonoKm.setText(formatDecimal(bonoKm));
+        etValorKmNuevo.setText(formatDecimal(valorKmNuevo));
+
+        tvValorKm.setVisibility(modalidadActual == Modalidad.PICKER ? View.GONE : View.VISIBLE);
+        tvValorKm.setText("Valor por KM (" + modalidadActual.getLabel() + "): $"
+                + formatDecimal(valorKmNuevo) + "/km");
 
         // Card informativa refleja el valor actual de la modalidad activa
         if (tvValorSku != null) {
@@ -178,11 +183,11 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
         Double comisionPct = Parsers.parseDoubleOrNull(Texts.s(etComision.getText()));
         Double rendimiento = usaKm ? Parsers.parseDoubleOrNull(Texts.s(etRendimiento.getText())) : null;
         Integer precioLitro= usaKm ? Parsers.parseIntOrNull(Texts.s(etPrecioLitro.getText())) : null;
-        Double bonoKm      = usaKm ? Parsers.parseDoubleOrNull(Texts.s(etBonoKm.getText())) : null;
+        Double valorKmNuevo = usaKm ? Parsers.parseDoubleOrNull(Texts.s(etValorKmNuevo.getText())) : null;
 
         // Validacion: campos obligatorios segun modalidad
         boolean faltaAlgo = valorSku == null || comisionPct == null
-                || (usaKm && (rendimiento == null || precioLitro == null || bonoKm == null));
+                || (usaKm && (rendimiento == null || precioLitro == null || valorKmNuevo == null));
         if (faltaAlgo) {
             Toast.makeText(this,
                     "Completa todos los campos con valores numéricos válidos",
@@ -208,8 +213,8 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
                 Toast.makeText(this, "Precio del litro debe ser mayor a 0", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (bonoKm < 0) {
-                Toast.makeText(this, "Bono por km no puede ser negativo", Toast.LENGTH_SHORT).show();
+            if (!BonosFormulario.valorKmValido(valorKmNuevo)) {
+                Toast.makeText(this, "Valor por KM debe ser mayor a 0 y finito", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
@@ -221,7 +226,7 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
         // Estos solo se usan si usaKm == true
         final Double fRendimiento    = rendimiento;
         final Integer fPrecioLitro   = precioLitro;
-        final Double fBonoKm         = bonoKm;
+        final Double fValorKmNuevo    = valorKmNuevo;
 
         // Mensaje del dialogo: lista solo los campos que se van a guardar
         StringBuilder lista = new StringBuilder();
@@ -230,7 +235,7 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
         if (usaKm) {
             lista.append("  • Rendimiento: ").append(formatDecimal(fRendimiento)).append(" km/L\n");
             lista.append("  • Precio del litro: $").append(fPrecioLitro).append("\n");
-            lista.append("  • Bono por km: $").append(formatDecimal(fBonoKm)).append("\n");
+            lista.append("  • Valor por KM ($/km): $").append(formatDecimal(fValorKmNuevo)).append("\n");
         }
 
         new MaterialAlertDialogBuilder(this)
@@ -238,8 +243,7 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
                 .setMessage(
                         "Vas a guardar los parámetros de la modalidad: " + fModalidad.getLabel() + ".\n\n" +
                         lista +
-                        "\nEstos valores afectan los cálculos de TODOS los días (pasados y futuros) " +
-                        "en los que esta modalidad esté activa.\n\n" +
+                        "\nEl cambio afecta solo pedidos NUEVOS, no los ya guardados.\n\n" +
                         "¿Confirmás guardar?"
                 )
                 .setPositiveButton("Guardar", (d, w) -> {
@@ -248,7 +252,7 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
                     if (usaKm) {
                         Prefs.setRendimientoKmPorLitro(this, fModalidad, fRendimiento);
                         Prefs.setPrecioLitro(this,           fModalidad, fPrecioLitro);
-                        Prefs.setBonoPorKmDomLunMar(this,    fModalidad, fBonoKm);
+                        Prefs.setValorKmNuevo(this,        fModalidad, fValorKmNuevo);
                     }
 
                     Toast.makeText(this,
@@ -271,7 +275,7 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
         if (usaKm) {
             lista.append("  • Rendimiento: ").append(Config.DEFAULT_RENDIMIENTO_KM_POR_LITRO).append(" km/L\n");
             lista.append("  • Precio del litro: $").append(Config.DEFAULT_PRECIO_LITRO).append("\n");
-            lista.append("  • Bono por km: $").append(Config.DEFAULT_BONO_POR_KM_DOM_LUN_MAR).append("\n");
+            lista.append("  • Valor por KM ($/km): $").append(Config.DEFAULT_VALOR_KM_NUEVO).append("\n");
         }
 
         new MaterialAlertDialogBuilder(this)
@@ -280,7 +284,7 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
                         "Esto vuelve los parámetros editables de la modalidad " +
                         fModalidad.getLabel() + " a sus valores originales:\n\n" +
                         lista +
-                        "\n¿Confirmás restaurar?"
+                        "\nEl cambio afecta solo pedidos NUEVOS, no los ya guardados.\n\n¿Confirmás restaurar?"
                 )
                 .setPositiveButton("Restaurar", (d, w) -> {
                     Prefs.setValorUnitSku(this, fModalidad, Config.DEFAULT_VALOR_UNIT_SKU);
@@ -288,7 +292,7 @@ public class ParametrosCalculosActivity extends AppCompatActivity {
                     if (usaKm) {
                         Prefs.setRendimientoKmPorLitro(this, fModalidad, Config.DEFAULT_RENDIMIENTO_KM_POR_LITRO);
                         Prefs.setPrecioLitro(this,           fModalidad, Config.DEFAULT_PRECIO_LITRO);
-                        Prefs.setBonoPorKmDomLunMar(this,    fModalidad, Config.DEFAULT_BONO_POR_KM_DOM_LUN_MAR);
+                        Prefs.setValorKmNuevo(this,        fModalidad, Config.DEFAULT_VALOR_KM_NUEVO);
                     }
 
                     Toast.makeText(this,

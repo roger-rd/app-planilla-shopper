@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import static cl.rdrp.planilla_shopper.util.BackupVersion.BACKUP_VERSION_CURRENT;
 
 import cl.rdrp.planilla_shopper.util.BackupVersion;
+import cl.rdrp.planilla_shopper.util.BackupData;
 
 import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.AppDatabase;
@@ -50,12 +51,6 @@ public class BackupActivity extends AppCompatActivity {
     //     asigna SHOPPER (decision N1: comportamiento original = Shopper).
     //   - Bonos NO se borran en restauracion de V1 (preservacion: el backup
     //     viejo no los conocia, no los podemos restaurar).
-    public static class BackupData {
-        public int version;
-        public java.util.List<cl.rdrp.planilla_shopper.data.Registro> registros;
-        public java.util.List<cl.rdrp.planilla_shopper.data.Combustible> combustibles;
-        public java.util.List<BonoExtra> bonos;
-    }
 
     // === CREAR ARCHIVO PARA EXPORTAR ===
     private void crearBackup() {
@@ -104,7 +99,7 @@ public class BackupActivity extends AppCompatActivity {
                 cl.rdrp.planilla_shopper.data.AppDatabase db = cl.rdrp.planilla_shopper.data.AppDatabase.get(this);
 
                 BackupData backup = new BackupData();
-                backup.version       = BACKUP_VERSION_CURRENT;       // V4
+                backup.version       = BACKUP_VERSION_CURRENT;       // V5
                 backup.registros     = db.registroDao().getAllSync();
                 backup.combustibles  = db.combustibleDao().getAllSync();
                 backup.bonos         = db.bonoDao().getAllSync();    // NUEVO en V2
@@ -119,7 +114,7 @@ public class BackupActivity extends AppCompatActivity {
                 }
 
                 runOnUiThread(() ->
-                        android.widget.Toast.makeText(this, "Respaldo V4 exportado. Usa la app actualizada para restaurarlo.", android.widget.Toast.LENGTH_LONG).show()
+                        android.widget.Toast.makeText(this, "Respaldo V5: restáuralo solo en la app actualizada", android.widget.Toast.LENGTH_LONG).show()
                 );
             } catch (Exception e) {
                 e.printStackTrace();
@@ -168,6 +163,9 @@ public class BackupActivity extends AppCompatActivity {
                     }
                 }
 
+                if (backup != null) {
+                    cl.rdrp.planilla_shopper.util.BackupNormalizacion.normalizarImportados(backup.registros);
+                }
                 db.runInTransaction(() -> {
                     // Registros y combustibles: SIEMPRE delete + insert
                     db.registroDao().deleteAllSync();

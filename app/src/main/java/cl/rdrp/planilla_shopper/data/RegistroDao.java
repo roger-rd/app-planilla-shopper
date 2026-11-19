@@ -22,10 +22,18 @@ public interface RegistroDao {
     @Query("UPDATE registro SET sku = :sku, tarifa_base = :tarifaBase, monto_base = :montoBase, " +
             "monto_sku = :montoSku, km_entrega = :entrega, km_retorno = :retorno, km = :km, " +
             "monto_km = :montoKm, monto_bono_km = :bonoKm, monto_bruto = :bruto, " +
-            "sg = :sg, ventana = :ventana, cant = 0 WHERE id = :id AND calc_origen = 2")
+            "bono_por_km = :tarifaBono, calc_origen = 3, " +
+            "sg = :sg, ventana = :ventana, cant = 0 WHERE id = :id AND calc_origen IN (2,3)")
     int updateCalculoNuevo(long id, String sku, long tarifaBase, long montoBase, long montoSku,
                           Double entrega, Double retorno, double km,
-                          long montoKm, long bonoKm, long bruto, long sg, int ventana);
+                          long montoKm, long bonoKm, long bruto, double tarifaBono, long sg, int ventana);
+
+    @Query("SELECT * FROM registro WHERE calc_origen = 2")
+    List<Registro> listSnapshots111();
+
+    @Query("UPDATE registro SET bono_por_km = :tarifaBono, calc_origen = 3 " +
+            "WHERE id = :id AND calc_origen = 2")
+    int normalizarSnapshot111(long id, double tarifaBono);
 
     @Query("DELETE FROM registro WHERE id = :id")
     int delete(long id);

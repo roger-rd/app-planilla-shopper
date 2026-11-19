@@ -28,9 +28,9 @@ public class MontosRegistroTest {
         }
     }
 
-    @Test public void origenDistintoDeDosDevuelveLegacyExactoSinRedondeos() {
+    @Test public void origenDistintoDeDosYTresDevuelveLegacyExactoSinRedondeos() {
         Registro r = guardado();
-        for (int origen : new int[]{0, 1, -1, 3}) {
+        for (int origen : new int[]{0, 1, -1, 4}) {
             r.calc_origen = origen;
             assertFalse(MontosRegistro.usaGuardados(r));
             long base = Config.basePorSku(11, Modalidad.SHOPPER, r.fecha);

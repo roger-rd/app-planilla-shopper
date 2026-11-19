@@ -23,7 +23,7 @@ public class Registro {
     public int ventana;
     public int cant;
 
-    // km conserva el total. calc_origen: 0 = cálculo actual; 2 reservado.
+    // km conserva el total. calc_origen: 0 = histórico; 2 = snapshot 1.1.1; 3 = derecho al bono guardado.
     @ColumnInfo(name = "km_entrega")
     public Double km_entrega;
 

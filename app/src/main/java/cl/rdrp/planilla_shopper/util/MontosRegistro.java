@@ -9,7 +9,7 @@ import cl.rdrp.planilla_shopper.data.Registro;
 public final class MontosRegistro {
     private MontosRegistro() {}
 
-    public static boolean usaGuardados(Registro r) { return r.calc_origen == 2; }
+    public static boolean usaGuardados(Registro r) { return CalculoNuevoRegistro.esNuevo(r); }
     public static long base(Registro r, long legacy) { return usaGuardados(r) ? r.monto_base : legacy; }
     public static long sku(Registro r, long legacy) { return usaGuardados(r) ? r.monto_sku : legacy; }
     public static long km(Registro r, long legacy) { return usaGuardados(r) ? r.monto_km : legacy; }

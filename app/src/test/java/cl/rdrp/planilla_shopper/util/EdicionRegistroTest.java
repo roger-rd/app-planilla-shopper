@@ -14,6 +14,7 @@ public class EdicionRegistroTest {
         r.modalidad = m.name();
         CalculoNuevoRegistro.completar(r, 1.55, 1.53, 3026, 61, 17.5, 23.5,
                 m == Modalidad.PICKER ? 0 : 72, .1525, 10, 1200);
+        r.calc_origen = CalculoNuevoRegistro.ORIGEN_BONO_CONFIG;
         return r;
     }
 
@@ -43,7 +44,7 @@ public class EdicionRegistroTest {
         }
     }
 
-    @Test public void retornoCeroYSalaYFechaDelPedido() {
+    @Test public void retornoCeroUsaTarifaGuardadaAunqueCambienSalaYFecha() {
         Registro r = pedido(Modalidad.DRIVER);
         CalculoNuevoRegistro.editarKm(r, 2.55, 0);
         assertEquals(Double.valueOf(0), r.km_retorno);
@@ -51,10 +52,10 @@ public class EdicionRegistroTest {
         assertEquals(60, r.monto_bono_km);
         r.local = "140";
         CalculoNuevoRegistro.editarKm(r, 3, 0);
-        assertEquals(0, r.monto_bono_km);
+        assertEquals(71, r.monto_bono_km);
         r.local = "139"; r.fecha = "2026-03-01";
         CalculoNuevoRegistro.editarKm(r, 4, 0);
-        assertEquals(0, r.monto_bono_km);
+        assertEquals(94, r.monto_bono_km);
     }
 
     @Test public void pickerNoCambiaNada() throws Exception {

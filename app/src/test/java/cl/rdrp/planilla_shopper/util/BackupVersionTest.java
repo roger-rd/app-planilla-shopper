@@ -6,8 +6,8 @@ import static org.junit.Assert.assertEquals;
 
 public class BackupVersionTest {
     @Test
-    public void exportsV4() {
-        assertEquals(4, BackupVersion.BACKUP_VERSION_CURRENT);
+    public void exportsV5() {
+        assertEquals(5, BackupVersion.BACKUP_VERSION_CURRENT);
     }
 
     @Test

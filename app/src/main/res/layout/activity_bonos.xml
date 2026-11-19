@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:padding="16dp">
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="vertical" android:padding="16dp">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:text="Bonos por km" android:textStyle="bold" android:textSize="16sp" />
+            <TextView android:id="@+id/tvModalidadBonos" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:layout_marginTop="6dp" />
+            <TextView android:id="@+id/tvEstadoBonos" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:text="Cargando salas…" />
+            <LinearLayout android:id="@+id/controlesBonos" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swBonoKmActivo" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:text="Bono por km activo" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:hint="Monto del bono por km ($)">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etMontoBonoKm" android:layout_width="match_parent"
+                        android:layout_height="wrap_content" android:inputType="numberDecimal" />
+                </com.google.android.material.textfield.TextInputLayout>
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Días de la semana" android:textStyle="bold" android:layout_marginTop="12dp" />
+                <LinearLayout android:id="@+id/diasBonoKm" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Salas (incluye archivadas)" android:textStyle="bold" android:layout_marginTop="12dp" />
+                <LinearLayout android:id="@+id/salasBonoKm" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:orientation="vertical" />
+                <Button android:id="@+id/btnGuardarBonos" android:layout_width="match_parent"
+                    android:layout_height="wrap_content" android:text="Guardar" />
+                <Button android:id="@+id/btnRestaurarBonos" style="?attr/borderlessButtonStyle"
+                    android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:text="Restaurar defaults" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</ScrollView>

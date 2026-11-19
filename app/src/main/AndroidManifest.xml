@@ -31,6 +31,7 @@
         <activity
             android:name=".ui.MonthlySummaryActivity"
             android:exported="false" />
+        <activity android:name=".ui.BonosActivity" android:exported="false" />
         <activity
             android:name=".ui.ParametrosCalculosActivity"
             android:exported="false" />

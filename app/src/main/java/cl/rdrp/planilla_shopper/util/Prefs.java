@@ -44,6 +44,15 @@ public class Prefs {
 
     private static final String NAME = "rdrp_prefs";
 
+    public static boolean bonoNormalizadoV3(Context c) {
+        return c.getSharedPreferences(NAME, Context.MODE_PRIVATE).getBoolean("bono_norm_v3_hecha", false);
+    }
+
+    public static void marcarBonoNormalizadoV3(Context c) {
+        c.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit()
+                .putBoolean("bono_norm_v3_hecha", true).apply();
+    }
+
     private static final String K_LOCAL = "local_default";
 
     // ===== Keys LEGACY (pre-N3, sin modalidad) =====
@@ -238,6 +247,49 @@ public class Prefs {
     }
     public static void setBonoPorKmDomLunMar(Context c, double v) {
         setBonoPorKmDomLunMar(c, getModalidad(c), v);
+    }
+
+    // Parámetros nuevos: no escriben ni reemplazan las claves históricas.
+    public static double getValorKmNuevo(Context c, Modalidad m) {
+        return leerDouble(prefs(c), keyFor(m, "valor_km"), Config.DEFAULT_VALOR_KM_NUEVO);
+    }
+    public static void setValorKmNuevo(Context c, Modalidad m, double valor) {
+        prefs(c).edit().putString(keyFor(m, "valor_km"), Double.toString(valor)).apply();
+    }
+    public static boolean getBonoKmActivo(Context c, Modalidad m) {
+        return prefs(c).getBoolean(keyFor(m, "bono_km_activo"), true);
+    }
+    public static void setBonoKmActivo(Context c, Modalidad m, boolean activo) {
+        prefs(c).edit().putBoolean(keyFor(m, "bono_km_activo"), activo).apply();
+    }
+    public static double getBonoKmMonto(Context c, Modalidad m) {
+        return leerDouble(prefs(c), keyFor(m, "bono_km_monto"), getBonoPorKmDomLunMar(c, m));
+    }
+    public static void setBonoKmMonto(Context c, Modalidad m, double monto) {
+        prefs(c).edit().putString(keyFor(m, "bono_km_monto"), Double.toString(monto)).apply();
+    }
+    public static java.util.Set<Integer> getBonoKmDias(Context c, Modalidad m) {
+        return BonoConfig.parseDias(prefs(c).getString(keyFor(m, "bono_km_dias"), "2,3"));
+    }
+    public static void setBonoKmDias(Context c, Modalidad m, java.util.Collection<Integer> dias) {
+        BonoConfig config = new BonoConfig(true, 0, dias, null);
+        java.util.List<String> tokens = new java.util.ArrayList<>();
+        for (int dia : config.dias) tokens.add(Integer.toString(dia));
+        prefs(c).edit().putString(keyFor(m, "bono_km_dias"), String.join(",", tokens)).apply();
+    }
+    public static java.util.Set<String> getBonoKmSalas(Context c, Modalidad m) {
+        return BonoConfig.parseSalas(prefs(c).getString(keyFor(m, "bono_km_salas"), "139"));
+    }
+    public static void setBonoKmSalas(Context c, Modalidad m, java.util.Collection<String> salas) {
+        java.util.Set<String> normalizadas = new java.util.TreeSet<>();
+        if (salas != null) for (String sala : salas) normalizadas.addAll(BonoConfig.parseSalas(sala));
+        prefs(c).edit().putString(keyFor(m, "bono_km_salas"), String.join(",", normalizadas)).apply();
+    }
+    private static double leerDouble(SharedPreferences p, String key, double defecto) {
+        String valor = p.getString(key, null);
+        if (valor == null) return defecto;
+        try { return Double.parseDouble(valor); }
+        catch (NumberFormatException e) { return defecto; }
     }
 
     // ===== Modalidad de trabajo (N1) =====

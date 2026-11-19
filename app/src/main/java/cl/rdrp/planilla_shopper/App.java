@@ -35,6 +35,23 @@ public class App extends Application {
         // adapters caen al fallback hardcoded (= seed inicial), lo cual
         // produce los mismos numeros que si el cache estuviera listo.
         TramosResolver.warmupAsync();
+        cl.rdrp.planilla_shopper.data.AppDatabase.ioExecutor.execute(() -> {
+            if (cl.rdrp.planilla_shopper.util.Prefs.bonoNormalizadoV3(this)) return;
+            try {
+                cl.rdrp.planilla_shopper.data.AppDatabase db =
+                        cl.rdrp.planilla_shopper.data.AppDatabase.get(this);
+                db.runInTransaction(() -> {
+                    for (cl.rdrp.planilla_shopper.data.Registro r : db.registroDao().listSnapshots111()) {
+                        cl.rdrp.planilla_shopper.util.CalculoNuevoRegistro.normalizarOrigen111(r);
+                        db.registroDao().normalizarSnapshot111(r.id, r.bono_por_km);
+                    }
+                });
+                // Solo tras commit; si el proceso muere antes, el barrido es idempotente.
+                cl.rdrp.planilla_shopper.util.Prefs.marcarBonoNormalizadoV3(this);
+            } catch (Exception e) {
+                android.util.Log.e("App", "No se pudo normalizar el bono; se reintentará al iniciar", e);
+            }
+        });
     }
 
     /**

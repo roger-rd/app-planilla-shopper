@@ -47,7 +47,7 @@
                     android:layout_marginTop="4dp"
                     android:textSize="12sp"
                     android:textStyle="italic"
-                    android:text="Los tramos por SKU, los valores de KM por fecha y las reglas de día de la semana NO son configurables." />
+                    android:text="Los tramos por SKU permanecen fijos en esta pantalla. El valor por KM es configurable; los bonos se configuran en Bonos por km." />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilValorSku"
@@ -107,14 +107,14 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/tilBonoKm"
+                    android:id="@+id/tilValorKmNuevo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="Bono por km (lun/mar) ($)">
+                    android:hint="Valor por KM ($/km)">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etBonoKm"
+                        android:id="@+id/etValorKmNuevo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="numberDecimal" />
@@ -181,7 +181,7 @@
                     android:id="@+id/tvValorKm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Valor por KM: $276 (valor TRANSITORIO) " />
+                    android:text="Valor por KM" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
         <com.google.android.material.card.MaterialCardView

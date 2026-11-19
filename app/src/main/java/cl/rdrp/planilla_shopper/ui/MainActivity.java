@@ -100,6 +100,8 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else if (id == R.id.nav_calculo) {
                 startActivity(new Intent(this, ParametrosCalculosActivity.class));
+            } else if (id == R.id.nav_bonos_km) {
+                startActivity(new Intent(this, BonosActivity.class));
             } else if (id == R.id.nav_tramos) {
                 startActivity(new Intent(this, TramosActivity.class));
             } else if (id == R.id.nav_modalidad) {
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 // N5: cambiar la sala/local activo. Usa el mismo popup que la
                 // bienvenida pero cancelable, y no encadena al de modalidad.
                 LocalPickerDialog.mostrar(this, "Sala de trabajo", true, l -> {
+                    actualizarBadgeSalaActiva();
                     Toast.makeText(this,
                             "Sala activa: " + l.display(),
                             Toast.LENGTH_SHORT).show();
@@ -659,7 +662,7 @@ public class MainActivity extends AppCompatActivity {
         etSg.setText(String.valueOf(r.sg));
         etCant.setText(String.valueOf(r.cant));
 
-        if (r.calc_origen == 2) {
+        if (CalculoNuevoRegistro.esNuevo(r)) {
             boolean usaKm = Modalidad.fromName(r.modalidad) != Modalidad.PICKER;
             boolean usaSku = Modalidad.fromName(r.modalidad) != Modalidad.DRIVER;
             com.google.android.material.textfield.TextInputEditText etEntrega =
@@ -707,7 +710,7 @@ public class MainActivity extends AppCompatActivity {
                             AppDatabase.get(this).registroDao().updateCalculoNuevo(r.id,
                                     r.sku, r.tarifa_base, r.monto_base, r.monto_sku,
                                     r.km_entrega, r.km_retorno, r.km, r.monto_km,
-                                    r.monto_bono_km, r.monto_bruto, sg, ventana);
+                                    r.monto_bono_km, r.monto_bruto, r.bono_por_km, sg, ventana);
                             runOnUiThread(this::cargarListaDelDia);
                         });
                         dialog.dismiss();
@@ -804,7 +807,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this,
                     "Primero indicá tu sala desde el menú lateral",
                     Toast.LENGTH_LONG).show();
-            LocalPickerDialog.mostrar(this, "Sala de trabajo", true, l -> {});
+            LocalPickerDialog.mostrar(this, "Sala de trabajo", true, l -> actualizarBadgeSalaActiva());
             return;
         }
 
@@ -856,13 +859,10 @@ public class MainActivity extends AppCompatActivity {
         r.modalidad = modalidad.name();
 
         AppDatabase.ioExecutor.execute(() -> {
-            double totalKm = modalidad == Modalidad.PICKER ? 0.0
-                    : CalculoNuevoRegistro.sumarKm(km, retornoD);
-            CalculoNuevoRegistro.completar(r, km, retornoD,
+            CalculoNuevoRegistro.completarNuevo(r, km, retornoD,
                     Config.basePorSku(skuQty, modalidad, fecha),
-                    Config.getValorUnitSku(modalidad), Config.getValorKm(fecha),
-                    Config.getBonoPorKmDomLunMar(modalidad),
-                    Math.round(Config.calcularBonoKm(totalKm, fecha, modalidad, local)),
+                    Config.getValorUnitSku(modalidad), Config.getValorKmNuevo(modalidad),
+                    Config.bonoConfig(modalidad), local,
                     Config.getComisionPorc(modalidad),
                     Config.getRendimientoKmPorLitro(modalidad), Config.getPrecioLitro(modalidad));
             AppDatabase.get(this).registroDao().insertIgnore(r);
