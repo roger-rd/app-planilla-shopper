@@ -17,6 +17,7 @@ import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.MontosRegistro;
 import cl.rdrp.planilla_shopper.util.Parsers;
 
 public class PedidoDetalleAdapter extends RecyclerView.Adapter<PedidoDetalleAdapter.VH> {
@@ -46,10 +47,22 @@ public class PedidoDetalleAdapter extends RecyclerView.Adapter<PedidoDetalleAdap
         Modalidad m = Modalidad.fromName(r.modalidad);
 
         // Tramos editables: version vigente para esta modalidad y fecha del registro
-        int base   = Config.basePorSku(skuQty, m, r.fecha);
-        int sSku   = skuQty * Config.getValorUnitSku(m);
-        long sKm   = Config.calcularTotalKm(r.km, r.fecha); // modificar cuando pase contingencia
-        long total = base + sSku + sKm;
+        long baseMonto, skuMonto, kmMonto;
+        long total;
+        if (MontosRegistro.usaGuardados(r)) {
+            baseMonto = MontosRegistro.base(r, 0);
+            skuMonto = MontosRegistro.sku(r, 0);
+            kmMonto = MontosRegistro.km(r, 0);
+            total = baseMonto + skuMonto + kmMonto;
+        } else {
+            int base   = Config.basePorSku(skuQty, m, r.fecha);
+            int sSku   = skuQty * Config.getValorUnitSku(m);
+            long sKm   = Config.calcularTotalKm(r.km, r.fecha); // modificar cuando pase contingencia
+            total = base + sSku + sKm;
+            baseMonto = base;
+            skuMonto = sSku;
+            kmMonto = sKm;
+        }
 
         h.tvTitulo.setText("SG: " + r.sg);
         h.tvDetalle.setText(
@@ -57,9 +70,9 @@ public class PedidoDetalleAdapter extends RecyclerView.Adapter<PedidoDetalleAdap
                         "   KM: " + String.format(Locale.US, "%.2f", r.km) +
                         "   Ventana: " + r.ventana +
                         "   CANT: " + r.cant + "\n" +
-                        "Base " + clp.format(base) +
-                        "  SKU " + clp.format(sSku) +
-                        "  KM " + clp.format(sKm)
+                        "Base " + clp.format(baseMonto) +
+                        "  SKU " + clp.format(skuMonto) +
+                        "  KM " + clp.format(kmMonto)
         );
         h.tvTotal.setText(clp.format(total));
 

@@ -17,6 +17,7 @@ import cl.rdrp.planilla_shopper.databinding.ActivityMonthlySummaryBinding;
 import cl.rdrp.planilla_shopper.data.BonoDao;
 import cl.rdrp.planilla_shopper.data.CombustibleDao;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.MontosRegistro;
 import cl.rdrp.planilla_shopper.util.Parsers;
 
 
@@ -107,18 +108,29 @@ public class MonthlySummaryActivity extends AppCompatActivity {
                 Modalidad m = Modalidad.fromName(r.modalidad);
 
                 // Tramos editables: version vigente para esta modalidad y fecha
-                int base = Config.basePorSku(skuQty, m, r.fecha);
-                int sSku = skuQty * Config.getValorUnitSku(m);
-                long sKm = Config.calcularTotalKm(r.km, r.fecha); // modif cuando pase contingencia
-                // N5.5: sala del registro determina si aplica bono (hoy solo "139").
-                double bonoKmReg = calcularBonoKm(r.km, r.fecha, m, r.local);
-                bonoKm$ += bonoKmReg;
+                if (MontosRegistro.usaGuardados(r)) {
+                    long base = MontosRegistro.base(r, 0);
+                    long sSku = MontosRegistro.sku(r, 0);
+                    long sKm = MontosRegistro.km(r, 0);
+                    double bonoKmReg = MontosRegistro.bonoKm(r, 0);
+                    bonoKm$ += bonoKmReg;
+                    long subtotalReg = base + sSku + sKm;
+                    totalMes$ += subtotalReg;
+                    descImpuestoAcum += (subtotalReg + bonoKmReg) * MontosRegistro.comision(r, 0);
+                } else {
+                    int base = Config.basePorSku(skuQty, m, r.fecha);
+                    int sSku = skuQty * Config.getValorUnitSku(m);
+                    long sKm = Config.calcularTotalKm(r.km, r.fecha); // modif cuando pase contingencia
+                    // N5.5: sala del registro determina si aplica bono (hoy solo "139").
+                    double bonoKmReg = calcularBonoKm(r.km, r.fecha, m, r.local);
+                    bonoKm$ += bonoKmReg;
 
-                long subtotalReg = base + sSku + sKm;
-                totalMes$ += subtotalReg;
+                    long subtotalReg = base + sSku + sKm;
+                    totalMes$ += subtotalReg;
 
-                // Comision per-registro (sobre subtotal + bono km del registro)
-                descImpuestoAcum += (subtotalReg + bonoKmReg) * Config.getComisionPorc(m);
+                    // Comision per-registro (sobre subtotal + bono km del registro)
+                    descImpuestoAcum += (subtotalReg + bonoKmReg) * Config.getComisionPorc(m);
+                }
             }
 
             // ✅ total final incluyendo bonos (una sola vez, fuera del for)

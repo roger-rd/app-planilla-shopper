@@ -27,6 +27,7 @@ import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.data.RegistroDao;
 import cl.rdrp.planilla_shopper.databinding.ActivityDashboardBinding;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.MontosRegistro;
 import cl.rdrp.planilla_shopper.util.Fechas;
 import cl.rdrp.planilla_shopper.util.Parsers;
 
@@ -117,27 +118,49 @@ public class DashboardActivity extends AppCompatActivity {
                 Modalidad m = Modalidad.fromName(r.modalidad);
 
                 // Tramos editables: usa la version vigente para esta modalidad y fecha
-                int  base   = Config.basePorSku(skuQty, m, r.fecha);
-                int  sSku   = skuQty * Config.getValorUnitSku(m);
-                long sKm    = Config.calcularTotalKm(r.km, r.fecha); //modif cuando pase contingencia
+                if (MontosRegistro.usaGuardados(r)) {
+                    long base = MontosRegistro.base(r, 0);
+                    long sSku = MontosRegistro.sku(r, 0);
+                    long sKm = MontosRegistro.km(r, 0);
+                    double bonoKm = MontosRegistro.bonoKm(r, 0);
+                    double total = base + sSku + sKm + bonoKm;
+                    totalDia += total;
+                    totalKm += r.km;
+                    totalBonosKm += bonoKm;
+                    comisionAcum += total * MontosRegistro.comision(r, 0);
+                    if (r.km > 0) {
+                        if (MontosRegistro.usaCombustibleGuardado(r)) {
+                            combustibleAcum += (r.km / MontosRegistro.rendimiento(r, 0))
+                                    * MontosRegistro.precioLitro(r, 0);
+                        } else {
+                            // Rendimiento guardado inválido: misma estimación legacy completa.
+                            combustibleAcum +=
+                                    (r.km / Config.getRendimientoKmPorLitro(m)) * Config.getPrecioLitro(m);
+                        }
+                    }
+                } else {
+                    int  base   = Config.basePorSku(skuQty, m, r.fecha);
+                    int  sSku   = skuQty * Config.getValorUnitSku(m);
+                    long sKm    = Config.calcularTotalKm(r.km, r.fecha); //modif cuando pase contingencia
 
-                // bono km según fecha (solo domingo, lunes, martes), monto segun modalidad.
-                // N5.5: ademas la sala del registro debe estar habilitada (hoy solo "139").
-                double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m, r.local);
-                double total = (long) base + sSku + sKm + bonoKm; // mismo total que en las cards
+                    // bono km según fecha (solo domingo, lunes, martes), monto segun modalidad.
+                    // N5.5: ademas la sala del registro debe estar habilitada (hoy solo "139").
+                    double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m, r.local);
+                    double total = (long) base + sSku + sKm + bonoKm; // mismo total que en las cards
 
-                totalDia     += total;
-                totalKm      += r.km;
-                totalBonosKm += bonoKm;
+                    totalDia     += total;
+                    totalKm      += r.km;
+                    totalBonosKm += bonoKm;
 
-                // Comision per-registro (sobre subtotal + bono km del registro)
-                comisionAcum += total * Config.getComisionPorc(m);
+                    // Comision per-registro (sobre subtotal + bono km del registro)
+                    comisionAcum += total * Config.getComisionPorc(m);
 
-                // Combustible per-registro: km del registro contra rendimiento
-                // y precio de SU modalidad. Picker no usa KM (km=0) -> contribuye 0.
-                if (r.km > 0) {
-                    combustibleAcum +=
-                            (r.km / Config.getRendimientoKmPorLitro(m)) * Config.getPrecioLitro(m);
+                    // Combustible per-registro: km del registro contra rendimiento
+                    // y precio de SU modalidad. Picker no usa KM (km=0) -> contribuye 0.
+                    if (r.km > 0) {
+                        combustibleAcum +=
+                                (r.km / Config.getRendimientoKmPorLitro(m)) * Config.getPrecioLitro(m);
+                    }
                 }
             }
 

@@ -18,6 +18,7 @@ import cl.rdrp.planilla_shopper.R;
 import cl.rdrp.planilla_shopper.data.Modalidad;
 import cl.rdrp.planilla_shopper.data.Registro;
 import cl.rdrp.planilla_shopper.util.Config;
+import cl.rdrp.planilla_shopper.util.MontosRegistro;
 import cl.rdrp.planilla_shopper.util.Parsers;
 
 public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
@@ -65,16 +66,29 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
         Modalidad m = Modalidad.fromName(r.modalidad);
 
         // Cálculos por fila — tramos editables segun modalidad+fecha del registro
-        int base   = Config.basePorSku(skuQty, m, r.fecha);
-        int sSku   = skuQty * Config.getValorUnitSku(m);
-        long sKm   = Config.calcularTotalKm(r.km, r.fecha); // KM con decimales → pesos // modif cuando pase contingencia
+        long baseMonto, skuMonto, kmMonto;
+        double bonoKm, total;
+        if (MontosRegistro.usaGuardados(r)) {
+            baseMonto = MontosRegistro.base(r, 0);
+            skuMonto = MontosRegistro.sku(r, 0);
+            kmMonto = MontosRegistro.km(r, 0);
+            bonoKm = MontosRegistro.bonoKm(r, 0);
+            total = baseMonto + skuMonto + kmMonto + bonoKm;
+        } else {
+            int base   = Config.basePorSku(skuQty, m, r.fecha);
+            int sSku   = skuQty * Config.getValorUnitSku(m);
+            long sKm   = Config.calcularTotalKm(r.km, r.fecha); // KM con decimales → pesos // modif cuando pase contingencia
 
-        // 💰 bono por km según fecha, usando bono de la modalidad del registro.
-        // N5.5: ademas la sala del registro debe estar habilitada (hoy solo "139").
-        double bonoKm = Config.calcularBonoKm(r.km, r.fecha, m, r.local);
+            // 💰 bono por km según fecha, usando bono de la modalidad del registro.
+            // N5.5: ademas la sala del registro debe estar habilitada (hoy solo "139").
+            bonoKm = Config.calcularBonoKm(r.km, r.fecha, m, r.local);
 
-        // total ya incluye el bono
-        double total = (long) base + sSku + sKm + bonoKm;
+            // total ya incluye el bono
+            total = (long) base + sSku + sKm + bonoKm;
+            baseMonto = base;
+            skuMonto = sSku;
+            kmMonto = sKm;
+        }
 
         // ===== Bind a la UI =====
         h.titulo.setText("SG: " + r.sg);
@@ -83,9 +97,9 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.VH> {
                 "SKU: " + skuQty +
                         "  KM: " + String.format(java.util.Locale.US, "%.2f", r.km) +
                         "  Ventana: " + r.ventana +
-                        "\nBase " + money.format(base) +
-                        "  SKU " + money.format(sSku) +
-                        "  KM " + money.format(sKm) +
+                        "\nBase " + money.format(baseMonto) +
+                        "  SKU " + money.format(skuMonto) +
+                        "  KM " + money.format(kmMonto) +
                         "  CANT: " + r.cant
         );
 
