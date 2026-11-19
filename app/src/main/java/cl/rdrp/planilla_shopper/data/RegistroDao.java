@@ -19,6 +19,14 @@ public interface RegistroDao {
     @Query("UPDATE registro SET fecha = :fecha, sku = :sku, km = :km, sg = :sg, ventana = :ventana, cant = :cant  WHERE id = :id")
     int update(long id, String fecha, String sku, double km, long sg, int ventana, int cant);
 
+    @Query("UPDATE registro SET sku = :sku, tarifa_base = :tarifaBase, monto_base = :montoBase, " +
+            "monto_sku = :montoSku, km_entrega = :entrega, km_retorno = :retorno, km = :km, " +
+            "monto_km = :montoKm, monto_bono_km = :bonoKm, monto_bruto = :bruto, " +
+            "sg = :sg, ventana = :ventana, cant = 0 WHERE id = :id AND calc_origen = 2")
+    int updateCalculoNuevo(long id, String sku, long tarifaBase, long montoBase, long montoSku,
+                          Double entrega, Double retorno, double km,
+                          long montoKm, long bonoKm, long bruto, long sg, int ventana);
+
     @Query("DELETE FROM registro WHERE id = :id")
     int delete(long id);
 

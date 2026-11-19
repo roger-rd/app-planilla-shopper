@@ -191,12 +191,22 @@ public class Config {
     public static Double calcularBonoKm(double km, String fechaIso,
                                         Modalidad modalidad, String sala) {
         if (km <= 0) return 0.0;
-        if (fechaIso == null || fechaIso.trim().isEmpty()) return 0.0;
+        if (!bonoKmAplica(fechaIso, modalidad, sala)) return 0.0;
+        try {
+            return (double) Math.round(km * getBonoPorKmDomLunMar(modalidad));
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    /** Elegibilidad histórica, independiente de la tarifa vigente. */
+    public static boolean bonoKmAplica(String fechaIso, Modalidad modalidad, String sala) {
+        if (fechaIso == null || fechaIso.trim().isEmpty()) return false;
 
         // N5.5: gating por sala+modalidad. Si la policy dice que no aplica,
         // no se evalua el resto. Esto deja arquitectura lista para N6 sin
         // tocar a los consumidores.
-        if (!BonoKmPolicy.aplica(sala, modalidad)) return 0.0;
+        if (!BonoKmPolicy.aplica(sala, modalidad)) return false;
 
         try {
             java.text.SimpleDateFormat sdf =
@@ -216,13 +226,10 @@ public class Config {
                     day == java.util.Calendar.MONDAY ||
                             day == java.util.Calendar.TUESDAY ||
                             (aplicaDomingo && day == java.util.Calendar.SUNDAY);
-            if(!aplica) return 0.0;
-
-            // monto por km recorrido segun la modalidad del registro
-            return (double) Math.round(km * getBonoPorKmDomLunMar(modalidad));
+            return aplica;
 
         } catch (Exception e) {
-            return 0.0; // si falla el parseo, mejor no dar bono
+            return false; // si falla el parseo, mejor no dar bono
         }
     }
 

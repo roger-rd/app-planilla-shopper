@@ -443,6 +443,63 @@ public class MainActivity extends AppCompatActivity {
         etSg.setText(String.valueOf(r.sg));
         etCant.setText(String.valueOf(r.cant));
 
+        if (r.calc_origen == 2) {
+            boolean usaKm = Modalidad.fromName(r.modalidad) != Modalidad.PICKER;
+            boolean usaSku = Modalidad.fromName(r.modalidad) != Modalidad.DRIVER;
+            com.google.android.material.textfield.TextInputEditText etEntrega =
+                    view.findViewById(R.id.etKmEntregaEdit);
+            com.google.android.material.textfield.TextInputEditText etRetorno =
+                    view.findViewById(R.id.etKmRetornoEdit);
+            view.findViewById(R.id.tilKmEdit).setVisibility(android.view.View.GONE);
+            view.findViewById(R.id.tilCantEdit).setVisibility(android.view.View.GONE);
+            view.findViewById(R.id.tilKmEntregaEdit).setVisibility(usaKm ? android.view.View.VISIBLE : android.view.View.GONE);
+            view.findViewById(R.id.tilKmRetornoEdit).setVisibility(usaKm ? android.view.View.VISIBLE : android.view.View.GONE);
+            etEntrega.setText(String.valueOf(r.km_entrega == null ? 0.0 : r.km_entrega));
+            etRetorno.setText(String.valueOf(r.km_retorno == null ? 0.0 : r.km_retorno));
+            // La fecha conserva las tarifas y reglas históricas del pedido.
+            etFecha.setEnabled(false);
+            etSku.setEnabled(usaSku);
+            androidx.appcompat.app.AlertDialog dialog =
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                            .setTitle("Editar registro")
+                            .setView(view)
+                            .setPositiveButton("Guardar", null)
+                            .setNegativeButton("Cancelar", null)
+                            .create();
+            dialog.setOnShowListener(d -> dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE)
+                    .setOnClickListener(v -> {
+                        String retornoTxt = Texts.s(etRetorno.getText());
+                        Double entrega = usaKm ? Parsers.parseDoubleOrNull(Texts.s(etEntrega.getText())) : 0.0;
+                        Double retorno = usaKm ? Parsers.parseDoubleOrNull(retornoTxt.isEmpty() ? "0" : retornoTxt) : 0.0;
+                        Integer sku = usaSku ? Parsers.parseIntOrNull(Texts.s(etSku.getText())) : 0;
+                        Long sg = Parsers.parseLongOrNull(Texts.s(etSg.getText()));
+                        Integer ventana = Parsers.parseIntOrNull(Texts.s(etVentana.getText()));
+                        if (sku == null || entrega == null || retorno == null || sg == null || ventana == null) {
+                            Toast.makeText(this, "SKU, KM, SG y Ventana deben ser numéricos", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (!Double.isFinite(entrega) || !Double.isFinite(retorno)
+                                || !Double.isFinite(entrega + retorno) || entrega < 0 || retorno < 0) {
+                            Toast.makeText(this, "KM debe ser finito y no negativo", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (sg < 0) { Toast.makeText(this, "SG no puede ser negativo", Toast.LENGTH_SHORT).show(); return; }
+                        if (ventana < 0) { Toast.makeText(this, "Ventana no puede ser negativa", Toast.LENGTH_SHORT).show(); return; }
+                        AppDatabase.ioExecutor.execute(() -> {
+                            CalculoNuevoRegistro.editarSkuYKm(r, sku, entrega, retorno,
+                                    cl.rdrp.planilla_shopper.util.TramosResolver::getValor);
+                            AppDatabase.get(this).registroDao().updateCalculoNuevo(r.id,
+                                    r.sku, r.tarifa_base, r.monto_base, r.monto_sku,
+                                    r.km_entrega, r.km_retorno, r.km, r.monto_km,
+                                    r.monto_bono_km, r.monto_bruto, sg, ventana);
+                            runOnUiThread(this::cargarListaDelDia);
+                        });
+                        dialog.dismiss();
+                    }));
+            dialog.show();
+            return;
+        }
+
         // Hacer que el campo de fecha abra DatePicker y no teclado
         etFecha.setInputType(android.text.InputType.TYPE_NULL);
         etFecha.setFocusable(false);

@@ -117,7 +117,7 @@ public class TramosResolver {
      * Indice de tramo (1..8) para una cantidad de SKU, usando los limites
      * fijos de Config.TRAMOS_LIMITES.
      */
-    private static int indiceTramo(int skuQty) {
+    public static int indiceTramo(int skuQty) {
         int[] limites = Config.TRAMOS_LIMITES;
         for (int i = 0; i < limites.length; i++) {
             if (skuQty <= limites[i]) return i + 1;

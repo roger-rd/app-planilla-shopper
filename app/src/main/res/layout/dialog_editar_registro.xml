@@ -47,9 +47,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
+        android:id="@+id/tilKmEdit"
         android:hint="KM">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etKmEdit"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="0123456789.,"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilKmEntregaEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        android:hint="KM entrega">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etKmEntregaEdit"
+            android:inputType="numberDecimal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:digits="0123456789.,"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilKmRetornoEdit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        android:hint="KM retorno">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etKmRetornoEdit"
             android:inputType="numberDecimal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,6 +106,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
+        android:id="@+id/tilCantEdit"
         android:hint="Cant">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etCantEdit"

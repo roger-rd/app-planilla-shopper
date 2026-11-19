@@ -16,6 +16,61 @@ public final class CalculoNuevoRegistro {
         return BigDecimal.valueOf(entrega).add(BigDecimal.valueOf(retorno)).doubleValue();
     }
 
+    /** Edita únicamente los KM del snapshot; sin cambios conserva incluso los montos.
+     * No consulta Prefs ni tramos: fecha, sala y tarifas pertenecen al pedido. */
+    public static void editarKm(Registro r, double entrega, double retorno) {
+        if (r.calc_origen != 2) throw new IllegalArgumentException("El pedido no usa cálculo nuevo");
+        Modalidad modalidad = Modalidad.fromName(r.modalidad);
+        if (modalidad == Modalidad.PICKER) return;
+        if (!Double.isFinite(entrega) || !Double.isFinite(retorno)
+                || !Double.isFinite(entrega + retorno) || entrega < 0 || retorno < 0) {
+            throw new IllegalArgumentException("KM debe ser finito y no negativo");
+        }
+        if (r.km_entrega != null && r.km_retorno != null
+                && r.km_entrega == entrega && r.km_retorno == retorno) return;
+        r.km_entrega = entrega;
+        r.km_retorno = retorno;
+        r.km = sumarKm(entrega, retorno);
+        r.monto_km = Math.round(r.km * r.valor_km);
+        r.monto_bono_km = Config.bonoKmAplica(r.fecha, modalidad, r.local)
+                ? Math.round(r.km * r.bono_por_km) : 0;
+        r.monto_bruto = r.monto_base + r.monto_sku + r.monto_km + r.monto_bono_km;
+    }
+
+    @FunctionalInterface
+    public interface ResolverBase {
+        int getValor(int sku, Modalidad modalidad, String fecha);
+    }
+
+    /** Edita SKU y KM con las tarifas del snapshot y la base de la fecha del pedido.
+     * Sin cambios numéricos conserva todos los campos, incluido el texto del SKU. */
+    public static void editarSkuYKm(Registro r, int nuevoSku, double entrega,
+                                    double retorno, ResolverBase resolver) {
+        if (r.calc_origen != 2) throw new IllegalArgumentException("El pedido no usa cálculo nuevo");
+        Modalidad modalidad = Modalidad.fromName(r.modalidad);
+        int anterior = Parsers.parseIntOrZero(r.sku);
+        boolean cambiaSku = modalidad != Modalidad.DRIVER && anterior != nuevoSku;
+        // Resolver antes de modificar el snapshot; editarKm valida antes de escribir.
+        long base = r.tarifa_base;
+        boolean cambiaTramo = cambiaSku && tramo(anterior) != tramo(nuevoSku);
+        if (cambiaTramo) base = nuevoSku <= 0 ? 0 : resolver.getValor(nuevoSku, modalidad, r.fecha);
+        editarKm(r, entrega, retorno);
+        if (!cambiaSku) return;
+        r.sku = String.valueOf(nuevoSku);
+        if (cambiaTramo) {
+            r.tarifa_base = base;
+            r.monto_base = base;
+        }
+        // El alta multiplica dos int antes de asignar a long.
+        r.monto_sku = nuevoSku * (int) r.valor_unit_sku;
+        r.monto_bruto = r.monto_base + r.monto_sku + r.monto_km + r.monto_bono_km;
+    }
+
+    /** Sin tramo para SKU <= 0; los positivos comparten los límites inclusivos del resolver. */
+    private static int tramo(int sku) {
+        return sku <= 0 ? 0 : TramosResolver.indiceTramo(sku);
+    }
+
     /** Solo para registros nuevos: no modifica cant ni datos de pedidos históricos.
      * montoBonoKm es el resultado ya redondeado de Config.calcularBonoKm.
      * tarifaBase es el tramo vigente, no un cargo adicional por pedido. */
